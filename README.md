@@ -1,17 +1,42 @@
-# archify_app
+# Archify Mobile App
 
-A new Flutter project.
+The Archify Mobile App
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+# Setup
+## Prerequisites
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Make sure you have the following installed:
+  - Flutter
+  - Android Studio (for Android emulation)
+  - Xcode (only on Mac, for iOS emulation)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+After installing, verify your setup:
+```bash
+flutter doctor
+```
+
+
+# Running the app
+## Windows
+Start an Android emulator via Android Studio (Device Manager), then run:
+```bash
+flutter run
+```
+
+## Mac
+### Android:
+Start an Android emulator via Android Studio (Device Manager), then run:
+```bash
+flutter run
+```
+### iOS:
+Open the iOS simulator:
+```bash
+open -a Simulator
+```
+Then run:
+```bash
+flutter run
+```
