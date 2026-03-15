@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:archify_app/screens/home_screen.dart';
 
 void main() {
   runApp(const ArchifyApp());
@@ -16,22 +17,6 @@ class ArchifyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Archify'),
-      ),
-      body: const Center(
-        child: Text('Welcome to Archify'),
-      ),
     );
   }
 }
