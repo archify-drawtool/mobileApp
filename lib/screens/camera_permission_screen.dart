@@ -43,19 +43,19 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
                 const Icon(Icons.error_outline, size: 80),
                 const SizedBox(height: 24),
                 const Text(
-                  'Geen Camera Toegang',
+                  'Geen camera toegang',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  'Camera access was geweigerd. Please update je instellingen om Archify te gebruiken.',
+                  'Camera toegang is geweigerd. Pas dit aan in je instellingen om Archify te gebruiken.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
                   onPressed: () => openAppSettings(),
-                  child: const Text('Open Instellingen'),
+                  child: const Text('Instellingen openen'),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
@@ -64,7 +64,7 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
                       _denied = false;
                     });
                   },
-                  child: const Text('Probeer Opnieuw'),
+                  child: const Text('Probeer opnieuw'),
                 ),
               ],
             ),
@@ -84,19 +84,19 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
               const Icon(Icons.camera_alt_outlined, size: 80),
               const SizedBox(height: 24),
               const Text(
-                'Camera Toegang Benodigd',
+                'Camera toegang vereist',
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               const Text(
-                'Archify heeft toegang nodig tot de camera om een foto te nemen van de toolkit.',
+                'Archify heeft toegang tot je camera nodig om foto\'s te maken van je toolkit.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: _requestPermission,
-                child: const Text('Geeft toegang'),
+                child: const Text('Toegang toestaan'),
               ),
               const SizedBox(height: 12),
               TextButton(

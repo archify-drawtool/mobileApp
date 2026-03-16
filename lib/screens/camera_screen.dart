@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:archify_app/services/camera_service.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
 
@@ -12,6 +13,7 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   final CameraService _cameraService = CameraService();
+  final ImagePicker _imagePicker = ImagePicker();
   bool _isLoading = true;
 
   @override
@@ -29,6 +31,18 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _onTakePhoto() async {
     final photo = await _cameraService.takePhoto();
+    if (photo == null || !mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoPreviewScreen(photoPath: photo.path),
+      ),
+    );
+  }
+
+  Future<void> _onPickFromGallery() async {
+    final photo = await _imagePicker.pickImage(source: ImageSource.gallery);
     if (photo == null || !mounted) return;
 
     Navigator.push(
@@ -69,6 +83,18 @@ class _CameraScreenState extends State<CameraScreen> {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 40,
+            left: 40,
+            child: IconButton(
+              onPressed: _onPickFromGallery,
+              icon: const Icon(
+                Icons.photo_library,
+                color: Colors.white,
+                size: 32,
               ),
             ),
           ),

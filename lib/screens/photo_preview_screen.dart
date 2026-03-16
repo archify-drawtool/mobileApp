@@ -14,7 +14,7 @@ class PhotoPreviewScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 12),
           const Text(
-            'Use this photo?',
+            'Foto gebruiken?',
             style: TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 12),
@@ -34,17 +34,17 @@ class PhotoPreviewScreen extends StatelessWidget {
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Retake'),
+                  label: const Text('Opnieuw'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.popUntil(context, (route) => route.isFirst);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Photo ready for upload')),
+                      const SnackBar(content: Text('Foto klaar om te uploaden')),
                     );
                   },
                   icon: const Icon(Icons.check),
-                  label: const Text('Accept'),
+                  label: const Text('Accepteren'),
                 ),
               ],
             ),

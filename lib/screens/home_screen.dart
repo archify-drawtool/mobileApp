@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               icon: const Icon(Icons.camera_alt),
-              label: const Text('Maak Foto'),
+              label: const Text('Foto maken'),
             ),
           ],
         ),
