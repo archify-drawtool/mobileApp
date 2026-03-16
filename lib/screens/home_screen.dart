@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:archify_app/services/api_service.dart';
+import 'package:archify_app/screens/camera_permission_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
-  String _status = 'Loading...';
+  String _status = 'Laden...';
 
   @override
   void initState() {
@@ -32,9 +33,27 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Archify'),
       ),
       body: Center(
-        child: Text(
-          _status,
-          style: const TextStyle(fontSize: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _status,
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CameraPermissionScreen(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Maak Foto'),
+            ),
+          ],
         ),
       ),
     );
