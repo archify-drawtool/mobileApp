@@ -18,25 +18,31 @@ flutter doctor
 ```
 
 
-# Running the app
-## Windows
-Start an Android emulator via Android Studio (Device Manager), then run:
+## Running the app
+
+### Windows (Android emulator)
 ```bash
-flutter run
+flutter run --dart-define=API_URL=http://10.0.2.2:8000/api
 ```
 
-## Mac
-### Android:
-Start an Android emulator via Android Studio (Device Manager), then run:
+### Mac
+
+**iOS simulator:**
 ```bash
-flutter run
+flutter run --dart-define=API_URL=http://localhost:8000/api
 ```
-### iOS:
-Open the iOS simulator:
+
+**iOS fysiek apparaat:**
 ```bash
-open -a Simulator
+flutter run --dart-define=API_URL=http://<jouw-ip>:8000/api
 ```
-Then run:
+
+**Android emulator:**
 ```bash
-flutter run
+flutter run --dart-define=API_URL=http://10.0.2.2:8000/api
+```
+
+### Met Laravel Herd
+```bash
+flutter run --dart-define=API_URL=http://webapi.test/api
 ```
