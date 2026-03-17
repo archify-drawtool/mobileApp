@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
+import 'package:archify_app/screens/camera_screen.dart';
 
 class CameraPermissionScreen extends StatelessWidget {
   const CameraPermissionScreen({super.key});
-
-  Future<void> _takePhoto(BuildContext context) async {
-    final picker = ImagePicker();
-    final photo = await picker.pickImage(source: ImageSource.camera);
-
-    if (photo != null && context.mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PhotoPreviewScreen(photoPath: photo.path),
-        ),
-      );
-    }
-  }
 
   Future<void> _pickFromGallery(BuildContext context) async {
     final picker = ImagePicker();
@@ -51,7 +38,14 @@ class CameraPermissionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
-                onPressed: () => _takePhoto(context),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CameraScreen(),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Foto maken'),
               ),
