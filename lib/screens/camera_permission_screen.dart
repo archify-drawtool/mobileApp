@@ -21,22 +21,12 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
   Future<void> _checkExistingPermission() async {
     try {
       final cameras = await availableCameras();
-      if (cameras.isNotEmpty) {
-        final testController = CameraController(
-          cameras.first,
-          ResolutionPreset.low,
-          enableAudio: false,
+      if (cameras.isNotEmpty && mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CameraScreen()),
         );
-        await testController.initialize();
-        await testController.dispose();
-
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const CameraScreen()),
-          );
-          return;
-        }
+        return;
       }
     } catch (_) {}
 

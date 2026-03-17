@@ -1,8 +1,8 @@
-import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:archify_app/screens/photo_preview_screen.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:archify_app/screens/photo_preview_screen.dart';
+import 'package:archify_app/screens/camera_denied_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -11,7 +11,7 @@ class CameraScreen extends StatefulWidget {
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> {
+class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
   CameraController? _controller;
   bool _isReady = false;
   String? _error;
@@ -19,7 +19,19 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initCamera();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+      _controller?.dispose();
+      _controller = null;
+      setState(() => _isReady = false);
+    } else if (state == AppLifecycleState.resumed) {
+      _initCamera();
+    }
   }
 
   Future<void> _initCamera() async {
@@ -39,7 +51,10 @@ class _CameraScreenState extends State<CameraScreen> {
       await _controller!.initialize();
 
       if (mounted) {
-        setState(() => _isReady = true);
+        setState(() {
+          _isReady = true;
+          _error = null;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -50,6 +65,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller?.dispose();
     super.dispose();
   }
