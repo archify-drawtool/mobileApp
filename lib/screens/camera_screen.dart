@@ -1,3 +1,4 @@
+import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
@@ -56,10 +57,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     if (_error != null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Camera')),
-        body: Center(child: Text(_error!)),
-      );
+      return const CameraDeniedScreen();
     }
 
     if (!_isReady) {
