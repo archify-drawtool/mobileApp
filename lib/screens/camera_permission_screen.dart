@@ -49,17 +49,6 @@ class CameraPermissionScreen extends StatelessWidget {
                 icon: const Icon(Icons.camera_alt),
                 label: const Text('Foto maken'),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () => _pickFromGallery(context),
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Kies uit galerij'),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Terug'),
-              ),
             ],
           ),
         ),

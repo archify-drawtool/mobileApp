@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:archify_app/screens/home_screen.dart';
+import 'package:archify_app/screens/camera_permission_screen.dart';
 
 void main() {
   runApp(const ArchifyApp());
@@ -16,7 +16,7 @@ class ArchifyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: const CameraPermissionScreen(),
     );
   }
 }
