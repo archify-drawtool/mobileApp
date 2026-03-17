@@ -1,15 +1,11 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
 
 class ApiService {
-  static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      return 'http://localhost:8000/api';
-    }
-  }
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://localhost:8000/api',
+  );
 
   Future<String> checkHealth() async {
     try {
