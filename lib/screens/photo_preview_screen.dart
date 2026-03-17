@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:archify_app/theme/app_theme.dart';
 
 class PhotoPreviewScreen extends StatelessWidget {
   final String photoPath;
@@ -9,63 +11,86 @@ class PhotoPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Preview'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        title: const Text('Archify'),
         automaticallyImplyLeading: false,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.magenta, width: 1.5),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'PREVIEW',
+              style: TextStyle(
+                color: AppColors.magenta,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          const SizedBox(height: 8),
-          const Text(
+          const SizedBox(height: 4),
+          Text(
             'Foto gebruiken?',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+              color: AppColors.grey,
+              fontSize: 14,
             ),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(photoPath),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.magenta, width: 2),
+                ),
+                child: ClipRect(
+                  child: Image.file(
+                    File(photoPath),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Opnieuw'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: const BorderSide(color: Colors.white),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(LucideIcons.refreshCw, size: 18),
+                    label: const Text('Opnieuw'),
+                  ),
                 ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Foto klaar om te uploaden')),
-                  );
-                },
-                icon: const Icon(Icons.check),
-                label: const Text('Accepteren'),
-              ),
-            ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Foto klaar om te uploaden')),
+                      );
+                    },
+                    icon: Icon(LucideIcons.check, size: 18),
+                    label: const Text('Accepteren'),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 40),
         ],

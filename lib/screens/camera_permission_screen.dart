@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/camera_screen.dart';
+import 'package:archify_app/theme/app_theme.dart';
 
 class CameraPermissionScreen extends StatefulWidget {
   const CameraPermissionScreen({super.key});
@@ -38,8 +40,10 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
   @override
   Widget build(BuildContext context) {
     if (_checking) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.magenta),
+        ),
       );
     }
 
@@ -51,29 +55,43 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.camera_alt_outlined, size: 80),
+              Icon(
+                LucideIcons.camera,
+                color: AppColors.white,
+                size: 80,
+              ),
               const SizedBox(height: 24),
               const Text(
                 'Camera toegang vereist',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Archify heeft toegang tot je camera nodig om foto\'s te maken van je toolkit.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  color: AppColors.grey,
+                  fontSize: 14,
+                ),
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CameraScreen(),
-                    ),
-                  );
-                },
-                child: const Text('Toegang toestaan'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CameraScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('Toegang toestaan'),
+                ),
               ),
               const SizedBox(height: 12),
               TextButton(
