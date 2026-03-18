@@ -26,12 +26,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Archify'),
-      ),
-      body: const Center(
-        child: Text('Welcome to Archify'),
-      ),
+      appBar: AppBar(title: const Text('Archify')),
+      body: const Center(child: Text('Welcome to Archify')),
     );
   }
 }
