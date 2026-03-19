@@ -18,6 +18,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   final ImagePicker _imagePicker = ImagePicker();
   bool _isReady = false;
   bool _isNavigating = false;
+  bool _isInitializing = false;
 
   @override
   void initState() {
@@ -28,17 +29,24 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isNavigating || _isInitializing) return;
+
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      _controller?.dispose();
-      _controller = null;
-      setState(() => _isReady = false);
+      if (_isReady) {
+        _controller?.dispose();
+        _controller = null;
+        setState(() => _isReady = false);
+      }
     } else if (state == AppLifecycleState.resumed) {
-      _initCamera();
+      if (!_isReady) {
+        _initCamera();
+      }
     }
   }
 
   Future<void> _initCamera() async {
-    if (_isNavigating) return;
+    if (_isNavigating || _isInitializing) return;
+    _isInitializing = true;
 
     try {
       final cameras = await availableCameras();
@@ -72,6 +80,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           MaterialPageRoute(builder: (context) => const CameraDeniedScreen()),
         );
       }
+    } finally {
+      _isInitializing = false;
     }
   }
 
