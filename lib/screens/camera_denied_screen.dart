@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:archify_app/screens/camera_permission_screen.dart';
+import 'package:archify_app/screens/camera_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 
 class CameraDeniedScreen extends StatelessWidget {
@@ -64,7 +64,7 @@ class CameraDeniedScreen extends StatelessWidget {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const CameraPermissionScreen(),
+                    builder: (context) => const CameraScreen(),
                   ),
                 );
               },

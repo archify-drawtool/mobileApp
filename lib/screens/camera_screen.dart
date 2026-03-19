@@ -17,7 +17,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   CameraController? _controller;
   final ImagePicker _imagePicker = ImagePicker();
   bool _isReady = false;
-  String? _error;
+  bool _isNavigating = false;
 
   @override
   void initState() {
@@ -38,10 +38,18 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   }
 
   Future<void> _initCamera() async {
+    if (_isNavigating) return;
+
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
-        setState(() => _error = 'Geen camera gevonden');
+        if (mounted && !_isNavigating) {
+          _isNavigating = true;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const CameraDeniedScreen()),
+          );
+        }
         return;
       }
 
@@ -53,15 +61,16 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
       await _controller!.initialize();
 
-      if (mounted) {
-        setState(() {
-          _isReady = true;
-          _error = null;
-        });
+      if (mounted && !_isNavigating) {
+        setState(() => _isReady = true);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _error = 'Camera fout: $e');
+      if (mounted && !_isNavigating) {
+        _isNavigating = true;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CameraDeniedScreen()),
+        );
       }
     }
   }
@@ -99,10 +108,6 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    if (_error != null) {
-      return const CameraDeniedScreen();
-    }
-
     if (!_isReady) {
       return Scaffold(
         body: Center(

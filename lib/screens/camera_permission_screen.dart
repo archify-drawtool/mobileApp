@@ -1,52 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/camera_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 
-class CameraPermissionScreen extends StatefulWidget {
+class CameraPermissionScreen extends StatelessWidget {
   const CameraPermissionScreen({super.key});
 
   @override
-  State<CameraPermissionScreen> createState() => _CameraPermissionScreenState();
-}
-
-class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
-  bool _checking = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkExistingPermission();
-  }
-
-  Future<void> _checkExistingPermission() async {
-    try {
-      final cameras = await availableCameras();
-      if (cameras.isNotEmpty && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const CameraScreen()),
-        );
-        return;
-      }
-    } catch (_) {}
-
-    if (mounted) {
-      setState(() => _checking = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_checking) {
-      return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.magenta),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Archify')),
       body: Center(
