@@ -1,3 +1,4 @@
+import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
@@ -128,7 +129,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Archify'),
+        title: const ArchifyLogo(),
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
@@ -167,7 +168,10 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                   border: Border.all(color: AppColors.magenta, width: 2),
                 ),
                 child: ClipRect(
-                  child: CameraPreview(_controller!),
+                  child: AspectRatio(
+                    aspectRatio: 3 / 4,
+                    child: CameraPreview(_controller!),
+                  ),
                 ),
               ),
             ),

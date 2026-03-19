@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/theme/app_theme.dart';
@@ -12,7 +13,7 @@ class PhotoPreviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Archify'),
+        title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
         actions: [
           Container(
@@ -52,10 +53,13 @@ class PhotoPreviewScreen extends StatelessWidget {
                   border: Border.all(color: AppColors.magenta, width: 2),
                 ),
                 child: ClipRect(
-                  child: Image.file(
-                    File(photoPath),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+                  child: AspectRatio(
+                    aspectRatio: 3 / 4,
+                    child: Image.file(
+                      File(photoPath),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
                   ),
                 ),
               ),

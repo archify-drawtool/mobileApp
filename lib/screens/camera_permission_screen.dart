@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/camera_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
+import 'package:archify_app/widgets/archify_logo.dart';
 
 class CameraPermissionScreen extends StatelessWidget {
   const CameraPermissionScreen({super.key});
@@ -9,7 +10,7 @@ class CameraPermissionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Archify')),
+      appBar: AppBar(title: const ArchifyLogo()),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

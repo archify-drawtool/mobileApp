@@ -3,6 +3,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/camera_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
+import 'package:archify_app/widgets/archify_logo.dart';
 
 class CameraDeniedScreen extends StatelessWidget {
   const CameraDeniedScreen({super.key});
@@ -11,7 +12,7 @@ class CameraDeniedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Archify'),
+        title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
       ),
       body: Padding(
