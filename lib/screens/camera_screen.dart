@@ -1,4 +1,5 @@
 import 'package:archify_app/widgets/archify_logo.dart';
+import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,6 +7,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
 import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
+import 'package:archify_app/widgets/camera_preview_box.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -131,22 +133,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       appBar: AppBar(
         title: const ArchifyLogo(),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.magenta, width: 1.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'CAMERA',
-              style: TextStyle(
-                color: AppColors.magenta,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          const ScreenBadge(label: 'CAMERA'),
         ],
       ),
       body: Column(
@@ -154,27 +141,11 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
           const SizedBox(height: 4),
           Text(
             'Richt op de toolkit',
-            style: TextStyle(
-              color: AppColors.grey,
-              fontSize: 14,
-            ),
+            style: AppTextStyles.body,
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.magenta, width: 2),
-                ),
-                child: ClipRect(
-                  child: AspectRatio(
-                    aspectRatio: 3 / 4,
-                    child: CameraPreview(_controller!),
-                  ),
-                ),
-              ),
-            ),
+            child: CameraPreviewBox(controller: _controller!),
           ),
           const SizedBox(height: 24),
           Row(

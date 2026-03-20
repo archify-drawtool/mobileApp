@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:archify_app/widgets/archify_logo.dart';
+import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/theme/app_theme.dart';
@@ -16,22 +17,7 @@ class PhotoPreviewScreen extends StatelessWidget {
         title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.magenta, width: 1.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'PREVIEW',
-              style: TextStyle(
-                color: AppColors.magenta,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
+          const ScreenBadge(label: 'PREVIEW'),
         ],
       ),
       body: Column(
@@ -39,10 +25,7 @@ class PhotoPreviewScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Foto gebruiken?',
-            style: TextStyle(
-              color: AppColors.grey,
-              fontSize: 14,
-            ),
+            style: AppTextStyles.body,
           ),
           const SizedBox(height: 16),
           Expanded(

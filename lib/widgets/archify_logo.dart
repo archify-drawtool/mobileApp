@@ -13,7 +13,7 @@ class ArchifyLogo extends StatelessWidget {
       text: TextSpan(
         style: GoogleFonts.syne(
           fontSize: fontSize,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
         children: const [
           TextSpan(

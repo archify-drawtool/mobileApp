@@ -7,6 +7,18 @@ class AppColors {
   static const Color grey = Color(0xFFA0A0A8);
   static const Color white = Colors.white;
 }
+class AppTextStyles {
+  static const TextStyle heading = TextStyle(
+    color: AppColors.white,
+    fontSize: 22,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle body = TextStyle(
+    color: AppColors.grey,
+    fontSize: 14,
+  );
+}
 
 class AppTheme {
   static ThemeData get theme {

@@ -25,20 +25,13 @@ class CameraPermissionScreen extends StatelessWidget {
               const SizedBox(height: 24),
               const Text(
                 'Camera toegang vereist',
-                style: TextStyle(
-                  color: AppColors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: AppTextStyles.heading
               ),
               const SizedBox(height: 12),
               Text(
                 'Archify heeft toegang tot je camera nodig om foto\'s te maken van je toolkit.',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: AppColors.grey,
-                  fontSize: 14,
-                ),
+                style: AppTextStyles.body,
               ),
               const SizedBox(height: 32),
               SizedBox(
