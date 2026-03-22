@@ -47,6 +47,17 @@ flutter run --dart-define=API_URL=http://10.0.2.2:8000/api
 flutter run --dart-define=API_URL=http://webapi.test/api
 ```
 
+
+
+
+
+
+
+
+
+
+
+
 # Debugging Guide
 
 ### Which device to use?
