@@ -39,7 +39,7 @@ class CameraDeniedScreen extends StatelessWidget {
               style: AppTextStyles.heading,
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'Camera toegang is geweigerd. Pas dit aan in je instellingen om Archify te gebruiken.',
               textAlign: TextAlign.center,
               style: AppTextStyles.body,

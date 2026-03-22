@@ -139,7 +139,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       body: Column(
         children: [
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Richt op de toolkit',
             style: AppTextStyles.body,
           ),

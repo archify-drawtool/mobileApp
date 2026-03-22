@@ -68,7 +68,7 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.camera,
                 color: AppColors.white,
                 size: 80,

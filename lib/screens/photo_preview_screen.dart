@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:archify_app/widgets/archify_logo.dart';
+import 'package:archify_app/widgets/photo_preview_box.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -23,30 +24,13 @@ class PhotoPreviewScreen extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Foto gebruiken?',
             style: AppTextStyles.body,
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.magenta, width: 2),
-                ),
-                child: ClipRect(
-                  child: AspectRatio(
-                    aspectRatio: 3 / 4,
-                    child: Image.file(
-                      File(photoPath),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            child: PhotoPreviewBox(photoPath: photoPath),
           ),
           const SizedBox(height: 24),
           Padding(
