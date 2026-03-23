@@ -1,15 +1,11 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:io';
 
 class ApiService {
-  static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      return 'http://localhost:8000/api';
-    }
-  }
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'http://localhost:8000/api',
+  );
 
   Future<String> checkHealth() async {
     try {
@@ -25,6 +21,31 @@ class ApiService {
       }
     } catch (e) {
       return 'Could not connect to API';
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadPhoto(String photoPath) async {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/photos/upload'),
+      );
+
+      request.files.add(
+        await http.MultipartFile.fromPath('photo', photoPath),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 201) {
+        return {'success': true, 'message': data['message']};
+      } else {
+        return {'success': false, 'message': data['message'] ?? 'Upload failed'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Could not connect to server'};
     }
   }
 }
