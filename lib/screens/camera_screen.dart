@@ -124,7 +124,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     if (!_isReady) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppColors.magenta),
         ),
@@ -166,7 +166,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                           border: Border.all(color: AppColors.grey),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           LucideIcons.image,
                           color: AppColors.grey,
                           size: 24,
