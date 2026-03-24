@@ -9,9 +9,10 @@ class ScreenBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(right: 16),
+      margin: const EdgeInsets.only(right: 24),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
+        color: AppColors.magentaLight,
         border: Border.all(color: AppColors.magenta, width: 1.5),
         borderRadius: BorderRadius.circular(20),
       ),

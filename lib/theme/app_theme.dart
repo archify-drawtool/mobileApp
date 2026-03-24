@@ -6,6 +6,7 @@ class AppColors {
   static const Color darkNavy = Color(0xFF0D0A1F);
   static const Color grey = Color(0xFFA0A0A8);
   static const Color white = Colors.white;
+  static const Color magentaLight = Color(0x33E5097F);
 }
 class AppTextStyles {
   static const TextStyle heading = TextStyle(
@@ -28,6 +29,7 @@ class AppTheme {
         backgroundColor: AppColors.darkNavy,
         foregroundColor: AppColors.white,
         elevation: 0,
+        titleSpacing: 24,
         titleTextStyle: GoogleFonts.syne(
           fontSize: 20,
           fontWeight: FontWeight.w600,

@@ -5,7 +5,7 @@ import 'package:archify_app/theme/app_theme.dart';
 class ArchifyLogo extends StatelessWidget {
   final double fontSize;
 
-  const ArchifyLogo({super.key, this.fontSize = 20});
+  const ArchifyLogo({super.key, this.fontSize = 36});
 
   @override
   Widget build(BuildContext context) {

@@ -156,7 +156,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 40),
+                    padding: const EdgeInsets.only(left: 24),
                     child: GestureDetector(
                       onTap: _onPickFromGallery,
                       child: Container(
