@@ -1,38 +1,85 @@
-name: Test CI
+name: Test Flutter Mobile CI
 
 on:
   push:
-    branches:
-      - 'Test'
+    branches: [ Test ]
   pull_request:
-    branches:
-      - 'Test'
+    branches: [ Test ]
 
 jobs:
-  ci:
-    name: Format, Analyze, Test & Build APK
+  flutter-checks:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.41.4'
+          channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Format
+      - name: Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Analyze
+      - name: Run linting (dart analyze)
         run: flutter analyze
 
-      - name: Test
+      - name: Run tests
         run: flutter test
 
-      - name: Build Android APK
+  build-android:
+    needs: flutter-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
         run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+#  build-ios:
+#    needs: flutter-checks
+#    runs-on: macos-latest  # iOS bouwen vereist macOS
+#    steps:
+#      - uses: actions/checkout@v5
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.41.4'
+#          channel: 'stable'
+#
+#      - name: Install dependencies
+#        run: flutter pub get
+#
+#      - name: Build iOS (geen signing)
+#        run: flutter build ios --release --no-codesign
+#
+#      - name: Upload iOS artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ios-release
+#          path: build/ios/iphoneos/Runner.app
