@@ -41,7 +41,7 @@ class ApiService {
       );
 
       final streamedResponse = await request.send().timeout(
-        const Duration(seconds: 15),
+        const Duration(seconds: 7),
       );
       final response = await http.Response.fromStream(streamedResponse);
       final data = jsonDecode(response.body);
