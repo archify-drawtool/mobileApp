@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/services/api_service.dart';
+import 'package:archify_app/services/photo_service.dart';
 
 class PhotoPreviewScreen extends StatefulWidget {
   final String photoPath;
@@ -17,12 +18,14 @@ class PhotoPreviewScreen extends StatefulWidget {
 
 class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
   final ApiService _apiService = ApiService();
+  final PhotoService _photoService = PhotoService();
   bool _isUploading = false;
 
   Future<void> _onAccept() async {
     setState(() => _isUploading = true);
 
-    final result = await _apiService.uploadPhoto(widget.photoPath);
+    final fixedPath = await _photoService.fixOrientation(widget.photoPath);
+    final result = await _apiService.uploadPhoto(fixedPath);
 
     if (!mounted) return;
 
