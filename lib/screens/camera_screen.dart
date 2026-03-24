@@ -2,6 +2,7 @@ import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
@@ -71,6 +72,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
       );
 
       await _controller!.initialize();
+      await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
       if (mounted && !_isNavigating) {
         setState(() => _isReady = true);
