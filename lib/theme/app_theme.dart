@@ -30,6 +30,7 @@ class AppTheme {
         foregroundColor: AppColors.white,
         elevation: 0,
         titleSpacing: 24,
+        centerTitle: false,
         titleTextStyle: GoogleFonts.syne(
           fontSize: 20,
           fontWeight: FontWeight.w600,
