@@ -54,7 +54,7 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
   @override
   Widget build(BuildContext context) {
     if (_checking) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppColors.magenta),
         ),

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/photo_preview_box.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
@@ -36,7 +35,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: Icon(LucideIcons.refreshCw, size: 18),
+                    icon: const Icon(LucideIcons.refreshCw, size: 18),
                     label: const Text('Opnieuw'),
                   ),
                 ),
@@ -51,7 +50,7 @@ class PhotoPreviewScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    icon: Icon(LucideIcons.check, size: 18),
+                    icon: const Icon(LucideIcons.check, size: 18),
                     label: const Text('Accepteren'),
                   ),
                 ),
