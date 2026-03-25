@@ -23,7 +23,8 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
 
   Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
-    final hasSeenPermissionScreen = prefs.getBool('hasSeenPermissionScreen') ?? false;
+    final hasSeenPermissionScreen =
+        prefs.getBool('hasSeenPermissionScreen') ?? false;
 
     if (hasSeenPermissionScreen && mounted) {
       Navigator.pushReplacement(
@@ -68,11 +69,7 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                LucideIcons.camera,
-                color: AppColors.white,
-                size: 80,
-              ),
+              const Icon(LucideIcons.camera, color: AppColors.white, size: 80),
               const SizedBox(height: 24),
               const Text(
                 'Camera toegang vereist',
@@ -96,7 +93,11 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
               TextButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Camera toegang is nodig om Archify te gebruiken')),
+                    const SnackBar(
+                      content: Text(
+                        'Camera toegang is nodig om Archify te gebruiken',
+                      ),
+                    ),
                   );
                 },
                 child: const Text('Niet nu'),

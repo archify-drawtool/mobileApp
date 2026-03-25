@@ -9,9 +9,7 @@ class ApiService {
 
   Future<String> checkHealth() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/health'),
-      );
+      final response = await http.get(Uri.parse('$baseUrl/health'));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

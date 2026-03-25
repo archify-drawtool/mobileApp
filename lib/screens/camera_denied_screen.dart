@@ -34,10 +34,7 @@ class CameraDeniedScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Geen Camera toegang',
-              style: AppTextStyles.heading,
-            ),
+            const Text('Geen Camera toegang', style: AppTextStyles.heading),
             const SizedBox(height: 12),
             const Text(
               'Camera toegang is geweigerd. Pas dit aan in je instellingen om Archify te gebruiken.',
@@ -57,9 +54,7 @@ class CameraDeniedScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => const CameraScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const CameraScreen()),
                 );
               },
               child: const Text('Probeer opnieuw'),

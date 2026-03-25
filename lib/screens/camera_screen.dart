@@ -17,7 +17,8 @@ class CameraScreen extends StatefulWidget {
   State<CameraScreen> createState() => _CameraScreenState();
 }
 
-class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver {
+class _CameraScreenState extends State<CameraScreen>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   final ImagePicker _imagePicker = ImagePicker();
   bool _isReady = false;
@@ -35,7 +36,8 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_isNavigating || _isInitializing) return;
 
-    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused) {
       if (_isReady) {
         _controller?.dispose();
         _controller = null;
@@ -134,21 +136,14 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
     return Scaffold(
       appBar: AppBar(
         title: const ArchifyLogo(),
-        actions: [
-          const ScreenBadge(label: 'CAMERA'),
-        ],
+        actions: [const ScreenBadge(label: 'CAMERA')],
       ),
       body: Column(
         children: [
           const SizedBox(height: 4),
-          const Text(
-            'Richt op de toolkit',
-            style: AppTextStyles.body,
-          ),
+          const Text('Richt op de toolkit', style: AppTextStyles.body),
           const SizedBox(height: 16),
-          Expanded(
-            child: CameraPreviewBox(controller: _controller!),
-          ),
+          Expanded(child: CameraPreviewBox(controller: _controller!)),
           const SizedBox(height: 24),
           Row(
             children: [

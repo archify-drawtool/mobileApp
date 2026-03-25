@@ -6,11 +6,7 @@ void main() {
   group('ArchifyLogo', () {
     testWidgets('should display Archi and fy', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ArchifyLogo(),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: ArchifyLogo())),
       );
 
       expect(find.byType(RichText), findsOneWidget);
@@ -18,11 +14,7 @@ void main() {
 
     testWidgets('should accept custom fontSize', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: ArchifyLogo(fontSize: 30),
-          ),
-        ),
+        const MaterialApp(home: Scaffold(body: ArchifyLogo(fontSize: 30))),
       );
 
       expect(find.byType(RichText), findsOneWidget);

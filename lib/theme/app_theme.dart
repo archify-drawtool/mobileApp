@@ -8,6 +8,7 @@ class AppColors {
   static const Color white = Colors.white;
   static const Color magentaLight = Color(0x33E5097F);
 }
+
 class AppTextStyles {
   static const TextStyle heading = TextStyle(
     color: AppColors.white,
@@ -15,10 +16,7 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
   );
 
-  static const TextStyle body = TextStyle(
-    color: AppColors.grey,
-    fontSize: 14,
-  );
+  static const TextStyle body = TextStyle(color: AppColors.grey, fontSize: 14);
 }
 
 class AppTheme {
@@ -40,26 +38,20 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.magenta,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.white,
           side: const BorderSide(color: AppColors.white),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.grey,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         ),
       ),
       useMaterial3: true,

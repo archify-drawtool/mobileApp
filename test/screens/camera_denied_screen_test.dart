@@ -7,10 +7,7 @@ void main() {
   group('CameraDeniedScreen', () {
     testWidgets('should display denied message', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.theme,
-          home: const CameraDeniedScreen(),
-        ),
+        MaterialApp(theme: AppTheme.theme, home: const CameraDeniedScreen()),
       );
 
       expect(find.text('Geen Camera toegang'), findsOneWidget);
@@ -18,10 +15,7 @@ void main() {
 
     testWidgets('should have settings button', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.theme,
-          home: const CameraDeniedScreen(),
-        ),
+        MaterialApp(theme: AppTheme.theme, home: const CameraDeniedScreen()),
       );
 
       expect(find.text('Instellingen openen'), findsOneWidget);
@@ -29,10 +23,7 @@ void main() {
 
     testWidgets('should have retry button', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.theme,
-          home: const CameraDeniedScreen(),
-        ),
+        MaterialApp(theme: AppTheme.theme, home: const CameraDeniedScreen()),
       );
 
       expect(find.text('Probeer opnieuw'), findsOneWidget);

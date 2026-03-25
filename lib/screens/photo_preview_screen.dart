@@ -17,21 +17,14 @@ class PhotoPreviewScreen extends StatelessWidget {
       appBar: AppBar(
         title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
-        actions: [
-          const ScreenBadge(label: 'PREVIEW'),
-        ],
+        actions: [const ScreenBadge(label: 'PREVIEW')],
       ),
       body: Column(
         children: [
           const SizedBox(height: 4),
-          const Text(
-            'Foto gebruiken?',
-            style: AppTextStyles.body,
-          ),
+          const Text('Foto gebruiken?', style: AppTextStyles.body),
           const SizedBox(height: 16),
-          Expanded(
-            child: PhotoPreviewBox(photoPath: photoPath),
-          ),
+          Expanded(child: PhotoPreviewBox(photoPath: photoPath)),
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -53,7 +46,9 @@ class PhotoPreviewScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.popUntil(context, (route) => route.isFirst);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Foto klaar om te uploaden')),
+                        const SnackBar(
+                          content: Text('Foto klaar om te uploaden'),
+                        ),
                       );
                     },
                     icon: Icon(LucideIcons.check, size: 18),
