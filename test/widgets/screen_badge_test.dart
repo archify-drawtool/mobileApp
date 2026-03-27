@@ -7,9 +7,7 @@ void main() {
     testWidgets('should display the label text', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: ScreenBadge(label: 'CAMERA'),
-          ),
+          home: Scaffold(body: ScreenBadge(label: 'CAMERA')),
         ),
       );
 
@@ -19,9 +17,7 @@ void main() {
     testWidgets('should display different labels', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: ScreenBadge(label: 'PREVIEW'),
-          ),
+          home: Scaffold(body: ScreenBadge(label: 'PREVIEW')),
         ),
       );
 
