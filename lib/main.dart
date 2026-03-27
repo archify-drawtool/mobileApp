@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:archify_app/screens/camera_permission_screen.dart';
+import 'package:archify_app/theme/app_theme.dart';
 
 void main() {
-  runApp(const ArchifyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
+    _,
+  ) {
+    runApp(const ArchifyApp());
+  });
 }
 
 class ArchifyApp extends StatelessWidget {
@@ -11,27 +19,8 @@ class ArchifyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Archify',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Archify'),
-      ),
-      body: const Center(
-        child: Text('Welcome to Archify'),
-      ),
+      theme: AppTheme.theme,
+      home: const CameraPermissionScreen(),
     );
   }
 }
