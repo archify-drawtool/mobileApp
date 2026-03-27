@@ -68,6 +68,19 @@ flutter run --dart-define=API_URL=http://webapi.test/api
 | Camera testing on Android | Android emulator (has simulated camera) |
 | Camera testing on iOS | Physical iPhone in release mode |
 | UI testing on iOS | iOS simulator (no camera available) |
+| Testing photo upload | Android emulator with Laravel running |
+
+For most development, use the Android emulator. It has a simulated camera, supports hot reload, and doesn't have the iOS debug limitations.
+
+### Hot reload
+
+While the app is running via `flutter run`, you can:
+
+- Press **r** for hot reload (instant UI updates, keeps state)
+- Press **R** for hot restart (restarts the app, resets state)
+- Press **q** to quit
+
+This is the fastest way to see your changes.
 
 ### Running on Android emulator
 
@@ -94,19 +107,21 @@ Note: Camera is not available in the iOS simulator.
 
 Debug mode on iOS has known limitations with camera apps. Use release mode:
 ```bash
-flutter build ios --release
 open ios/Runner.xcworkspace
 ```
 
-In Xcode: set scheme to Release, select your iPhone, then Product → Run.
+5. In Xcode: set scheme to **Release**, select your iPhone, then **Product → Run**
+
+Important: your Mac and iPhone must be on the same Wi-Fi network.
 
 Note: iOS will restart the app when you change camera permissions in Settings. This is normal iOS behavior.
 
 ### Testing on a physical Android device
 
-1. Enable Developer Mode on your phone
-2. Connect via USB
-3. Run:
+1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
+2. Enable USB Debugging in Developer Options
+3. Connect via USB
+4. Run:
 ```bash
 flutter run --dart-define=API_URL=http://<your-mac-ip>:8000/api
 ```
