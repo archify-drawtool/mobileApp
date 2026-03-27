@@ -52,21 +52,14 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
       appBar: AppBar(
         title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
-        actions: [
-          const ScreenBadge(label: 'PREVIEW'),
-        ],
+        actions: [const ScreenBadge(label: 'PREVIEW')],
       ),
       body: Column(
         children: [
           const SizedBox(height: 4),
-          const Text(
-            'Foto gebruiken?',
-            style: AppTextStyles.body,
-          ),
+          const Text('Foto gebruiken?', style: AppTextStyles.body),
           const SizedBox(height: 16),
-          Expanded(
-            child: PhotoPreviewBox(photoPath: widget.photoPath),
-          ),
+          Expanded(child: PhotoPreviewBox(photoPath: widget.photoPath)),
           const SizedBox(height: 24),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -75,7 +68,9 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _isUploading ? null : () => Navigator.pop(context),
+                    onPressed: _isUploading
+                        ? null
+                        : () => Navigator.pop(context),
                     icon: const Icon(LucideIcons.refreshCw, size: 18),
                     label: const Text('Opnieuw'),
                   ),
@@ -86,13 +81,13 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
                     onPressed: _isUploading ? null : _onAccept,
                     icon: _isUploading
                         ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.white,
-                      ),
-                    )
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.white,
+                            ),
+                          )
                         : const Icon(LucideIcons.check, size: 18),
                     label: Text(_isUploading ? 'Uploaden...' : 'Accepteren'),
                   ),

@@ -10,11 +10,9 @@ class ApiService {
 
   Future<String> checkHealth() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/health'),
-      ).timeout(
-        const Duration(seconds: 5),
-      );
+      final response = await http
+          .get(Uri.parse('$baseUrl/health'))
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -36,9 +34,7 @@ class ApiService {
         Uri.parse('$baseUrl/photos/upload'),
       );
 
-      request.files.add(
-        await http.MultipartFile.fromPath('photo', photoPath),
-      );
+      request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       final streamedResponse = await request.send().timeout(
         const Duration(seconds: 7),
@@ -49,10 +45,16 @@ class ApiService {
       if (response.statusCode == 201) {
         return {'success': true, 'message': data['message']};
       } else {
-        return {'success': false, 'message': data['message'] ?? 'Upload failed'};
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Upload failed',
+        };
       }
     } on TimeoutException {
-      return {'success': false, 'message': 'Upload duurde te lang. Controleer je internetverbinding.'};
+      return {
+        'success': false,
+        'message': 'Upload duurde te lang. Controleer je internetverbinding.',
+      };
     } catch (e) {
       return {'success': false, 'message': 'Could not connect to server'};
     }

@@ -29,7 +29,9 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(
-        find.text('Archify heeft toegang tot je camera nodig om foto\'s te maken van je toolkit.'),
+        find.text(
+          'Archify heeft toegang tot je camera nodig om foto\'s te maken van je toolkit.',
+        ),
         findsOneWidget,
       );
     });

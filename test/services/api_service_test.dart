@@ -21,13 +21,7 @@ void main() {
     test('checkHealth should handle connection failure', () async {
       final result = await apiService.checkHealth();
       // Without a running API, it should return an error message
-      expect(
-        result,
-        anyOf(
-          'Could not connect to API',
-          'Connection timed out',
-        ),
-      );
+      expect(result, anyOf('Could not connect to API', 'Connection timed out'));
     });
 
     test('uploadPhoto should handle connection failure', () async {
@@ -37,10 +31,13 @@ void main() {
       expect(result['message'], isNotEmpty);
     });
 
-    test('uploadPhoto should return a map with success and message keys', () async {
-      final result = await apiService.uploadPhoto('/fake/path.jpg');
-      expect(result.containsKey('success'), true);
-      expect(result.containsKey('message'), true);
-    });
+    test(
+      'uploadPhoto should return a map with success and message keys',
+      () async {
+        final result = await apiService.uploadPhoto('/fake/path.jpg');
+        expect(result.containsKey('success'), true);
+        expect(result.containsKey('message'), true);
+      },
+    );
   });
 }

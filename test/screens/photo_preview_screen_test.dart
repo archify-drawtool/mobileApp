@@ -42,7 +42,9 @@ void main() {
       expect(find.byType(BackButton), findsNothing);
     });
 
-    testWidgets('accept and retake buttons should be enabled initially', (tester) async {
+    testWidgets('accept and retake buttons should be enabled initially', (
+      tester,
+    ) async {
       await tester.pumpWidget(createScreen());
 
       final acceptButton = tester.widget<ElevatedButton>(
