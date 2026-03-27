@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+  <string>Archify heeft toegang tot je galerij nodig om foto's te selecteren</string>
+  <key>NSCameraUsageDescription</key>
+  <string>Deze app heeft toegang tot je camera nodig.</string>
 </dict>
 </plist>
