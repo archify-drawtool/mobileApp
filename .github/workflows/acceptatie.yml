@@ -1,10 +1,10 @@
-name: Flutter Mobile CI
+name: Acceptatie Flutter Mobile CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ Acceptatie ]
   pull_request:
-    branches: [ main ]
+    branches: [ Acceptatie ]
 
 jobs:
   flutter-checks:
