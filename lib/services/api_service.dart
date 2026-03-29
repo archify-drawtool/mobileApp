@@ -5,7 +5,7 @@ import 'dart:async';
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
-    defaultValue: 'http://10.0.2.2:8080/api',
+    defaultValue: 'http://localhost:8000/api',
   );
 
   Future<String> checkHealth() async {
@@ -18,12 +18,12 @@ class ApiService {
         final data = jsonDecode(response.body);
         return data['status'];
       } else {
-        return 'Error: ${response.statusCode}';
+        return 'Fout: ${response.statusCode}';
       }
     } on TimeoutException {
-      return 'Connection timed out';
+      return 'Verbinding duurde te lang';
     } catch (e) {
-      return 'Could not connect to API';
+      return 'Kan niet verbinden met de server';
     }
   }
 
@@ -37,7 +37,7 @@ class ApiService {
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       final streamedResponse = await request.send().timeout(
-        const Duration(seconds: 7),
+        const Duration(seconds: 15),
       );
       final response = await http.Response.fromStream(streamedResponse);
       final data = jsonDecode(response.body);
@@ -47,16 +47,19 @@ class ApiService {
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Upload failed',
+          'message': data['message'] ?? 'Er ging iets mis bij het uploaden',
         };
       }
     } on TimeoutException {
       return {
         'success': false,
-        'message': 'Upload duurde te lang. Controleer je internetverbinding.',
+        'message': 'Upload duurde te lang. Controleer je verbinding en probeer het opnieuw.',
       };
     } catch (e) {
-      return {'success': false, 'message': 'Could not connect to server'};
+      return {
+        'success': false,
+        'message': 'Kan niet verbinden met de server. Controleer of de server draait.',
+      };
     }
   }
 }

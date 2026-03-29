@@ -17,4 +17,11 @@ class PhotoService {
 
     return fixedPath;
   }
+
+  Future<void> cleanupFixedPhoto(String fixedPath) async {
+    final file = File(fixedPath);
+    if (await file.exists() && fixedPath.endsWith('_fixed.jpg')) {
+      await file.delete();
+    }
+  }
 }

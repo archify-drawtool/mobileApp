@@ -20,8 +20,13 @@ void main() {
 
     test('checkHealth should handle connection failure', () async {
       final result = await apiService.checkHealth();
-      // Without a running API, it should return an error message
-      expect(result, anyOf('Could not connect to API', 'Connection timed out'));
+      expect(
+        result,
+        anyOf(
+          'Kan niet verbinden met de server',
+          'Verbinding duurde te lang',
+        ),
+      );
     });
 
     test('uploadPhoto should handle connection failure', () async {
