@@ -53,12 +53,14 @@ class ApiService {
     } on TimeoutException {
       return {
         'success': false,
-        'message': 'Upload duurde te lang. Controleer je verbinding en probeer het opnieuw.',
+        'message':
+            'Upload duurde te lang. Controleer je verbinding en probeer het opnieuw.',
       };
     } catch (e) {
       return {
         'success': false,
-        'message': 'Kan niet verbinden met de server. Controleer of de server draait.',
+        'message':
+            'Kan niet verbinden met de server. Controleer of de server draait.',
       };
     }
   }

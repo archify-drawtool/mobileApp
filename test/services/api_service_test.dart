@@ -22,10 +22,7 @@ void main() {
       final result = await apiService.checkHealth();
       expect(
         result,
-        anyOf(
-          'Kan niet verbinden met de server',
-          'Verbinding duurde te lang',
-        ),
+        anyOf('Kan niet verbinden met de server', 'Verbinding duurde te lang'),
       );
     });
 
