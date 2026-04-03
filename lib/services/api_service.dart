@@ -21,7 +21,7 @@ class ApiService {
         return 'Fout: ${response.statusCode}';
       }
     } on TimeoutException {
-      return 'Verbinding duurde te lang';
+      return 'Connectie niet kunnen leggen: verbinden duurde te lang';
     } catch (e) {
       return 'Kan niet verbinden met de server';
     }
