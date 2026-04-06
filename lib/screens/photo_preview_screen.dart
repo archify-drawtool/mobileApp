@@ -27,6 +27,8 @@ class _PhotoPreviewScreenState extends State<PhotoPreviewScreen> {
     final fixedPath = await _photoService.fixOrientation(widget.photoPath);
     final result = await _apiService.uploadPhoto(fixedPath);
 
+    await _photoService.cleanupFixedPhoto(fixedPath);
+
     if (!mounted) return;
 
     setState(() => _isUploading = false);
