@@ -39,10 +39,7 @@ class ApiService {
     // Controleer eerst of het bestand bestaat
     final file = File(photoPath);
     if (!await file.exists()) {
-      return {
-        'success': false,
-        'message': 'Bestand niet gevonden: $photoPath',
-      };
+      return {'success': false, 'message': 'Bestand niet gevonden: $photoPath'};
     }
 
     // Stap 1: Verstuur het request (netwerk-fouten hier afvangen)
@@ -63,8 +60,7 @@ class ApiService {
     } on SocketException {
       return {
         'success': false,
-        'message':
-            'Server is niet bereikbaar. Controleer of de server draait.',
+        'message': 'Server is niet bereikbaar. Controleer of de server draait.',
       };
     } on TimeoutException {
       return {
@@ -73,10 +69,7 @@ class ApiService {
             'Upload duurde te lang. Controleer je verbinding en probeer het opnieuw.',
       };
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Kan geen verbinding maken: $e',
-      };
+      return {'success': false, 'message': 'Kan geen verbinding maken: $e'};
     }
 
     // Stap 2: Response verwerken (apart van netwerk-errors)
