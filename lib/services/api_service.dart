@@ -9,9 +9,13 @@ class ApiService {
     defaultValue: 'http://localhost:8000/api',
   );
 
+  final http.Client _client;
+
+  ApiService({http.Client? client}) : _client = client ?? http.Client();
+
   Future<String> checkHealth() async {
     try {
-      final response = await http
+      final response = await _client
           .get(
             Uri.parse('$baseUrl/health'),
             headers: {'Accept': 'application/json'},
@@ -36,13 +40,11 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> uploadPhoto(String photoPath) async {
-    // Controleer eerst of het bestand bestaat
     final file = File(photoPath);
     if (!await file.exists()) {
       return {'success': false, 'message': 'Bestand niet gevonden: $photoPath'};
     }
 
-    // Stap 1: Verstuur het request (netwerk-fouten hier afvangen)
     http.StreamedResponse streamedResponse;
     try {
       final request = http.MultipartRequest(
@@ -51,12 +53,11 @@ class ApiService {
       );
 
       request.headers['Accept'] = 'application/json';
-
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
-      streamedResponse = await request.send().timeout(
-        const Duration(seconds: 30),
-      );
+      streamedResponse = await _client
+          .send(request)
+          .timeout(const Duration(seconds: 30));
     } on SocketException {
       return {
         'success': false,
@@ -72,7 +73,6 @@ class ApiService {
       return {'success': false, 'message': 'Kan geen verbinding maken: $e'};
     }
 
-    // Stap 2: Response verwerken (apart van netwerk-errors)
     try {
       final response = await http.Response.fromStream(streamedResponse);
 
@@ -81,7 +81,6 @@ class ApiService {
         return {'success': true, 'message': data['message']};
       }
 
-      // Probeer foutmelding uit response body te halen
       String errorMessage;
       try {
         final data = jsonDecode(response.body);
