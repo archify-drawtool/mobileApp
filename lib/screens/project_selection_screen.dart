@@ -174,19 +174,15 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     }
 
     if (_projects.isEmpty) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40),
+          padding: EdgeInsets.symmetric(horizontal: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                LucideIcons.folderOpen,
-                color: AppColors.grey,
-                size: 48,
-              ),
-              const SizedBox(height: 16),
-              const Text(
+              Icon(LucideIcons.folderOpen, color: AppColors.grey, size: 48),
+              SizedBox(height: 16),
+              Text(
                 'Je hebt nog geen projecten.\nMaak eerst een project aan in de webapp.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.body,
@@ -200,7 +196,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       itemCount: _projects.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         final project = _projects[index];
         final isSelected = _selectedProject?.id == project.id;
