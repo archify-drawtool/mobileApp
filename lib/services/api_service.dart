@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:archify_app/models/project.dart';
+
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
@@ -39,7 +41,46 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> uploadPhoto(String photoPath) async {
+  Future<Map<String, dynamic>> getProjects() async {
+    try {
+      final response = await _client
+          .get(
+            Uri.parse('$baseUrl/projects'),
+            headers: {'Accept': 'application/json'},
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        final projects = data.map((json) => Project.fromJson(json)).toList();
+        return {'success': true, 'projects': projects};
+      } else {
+        return {
+          'success': false,
+          'message': 'Kon projecten niet ophalen (${response.statusCode})',
+        };
+      }
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar. Controleer of de server draait.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message': 'Verbinding duurde te lang. Probeer het later opnieuw.',
+      };
+    } on FormatException {
+      return {'success': false, 'message': 'Ongeldig antwoord van de server.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Kan niet verbinden met de server'};
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadPhoto(
+    String photoPath, {
+    required int projectId,
+  }) async {
     final file = File(photoPath);
     if (!await file.exists()) {
       return {'success': false, 'message': 'Bestand niet gevonden: $photoPath'};
@@ -53,6 +94,7 @@ class ApiService {
       );
 
       request.headers['Accept'] = 'application/json';
+      request.fields['project_id'] = projectId.toString();
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       streamedResponse = await _client
