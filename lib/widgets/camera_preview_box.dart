@@ -16,8 +16,7 @@ class CameraPreviewBox extends StatelessWidget {
           border: Border.all(color: AppColors.magenta, width: 2),
         ),
         child: ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.center,
+          child: SizedBox.expand(
             child: FittedBox(
               fit: BoxFit.cover,
               child: SizedBox(
