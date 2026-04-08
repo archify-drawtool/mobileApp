@@ -8,12 +8,14 @@ The Archify Mobile App for capturing and digitizing IT landscape sketches during
 lib/
 ├── main.dart              # App entry point
 ├── screens/               # Full-screen pages
+│   ├── login_screen.dart             # Login form
 │   ├── camera_screen.dart            # Camera with live preview
 │   ├── camera_permission_screen.dart # First-launch permission request
 │   ├── camera_denied_screen.dart     # Shown when camera is denied
 │   └── photo_preview_screen.dart     # Preview with accept/retake
 ├── services/              # API and business logic
-│   ├── api_service.dart              # API calls (health check, photo upload)
+│   ├── api_service.dart              # API calls (health check, login, photo upload)
+│   ├── auth_service.dart             # Token storage via shared_preferences
 │   └── photo_service.dart            # Photo orientation fix
 ├── widgets/               # Reusable UI components
 │   ├── archify_logo.dart             # Logo with colored "fy"
@@ -81,11 +83,6 @@ Why `10.0.2.2`? The Android emulator can't use `localhost` because that points t
 flutter run --dart-define=API_URL=http://localhost:8000/api
 ```
 
-**With Laravel Herd:**
-```bash
-flutter run --dart-define=API_URL=http://webapi.test/api
-```
-
 If you don't pass `--dart-define`, the app defaults to `http://localhost:8000/api`.
 
 ### 6. Make sure the backend is running
@@ -144,7 +141,7 @@ flutter run --dart-define=API_URL=http://localhost:8000/api
 
 Note: camera is not available in the iOS simulator. You can test the rest of the UI but not the actual camera.
 
-### Testing on a physical iPhone
+### Testing on a physical iPhone (Mac)
 
 Debug mode on iOS has known limitations with camera apps — iOS kills the app when you switch away. Use release mode instead:
 
@@ -174,15 +171,47 @@ Important: your Mac and iPhone must be on the same Wi-Fi network.
 
 Note: with a free Apple developer account, the app expires after 7 days and needs to be reinstalled.
 
-### Testing on a physical Android device
+### Testing on a physical Android device (Mac)
 
 1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
 2. Enable USB Debugging in Developer Options
 3. Connect via USB
-4. Run:
+4. Find your Mac's IP address:
 ```bash
-flutter run --dart-define=API_URL=http://<your-mac-ip>:8000/api
+ipconfig getifaddr en0
 ```
+5. Start Laravel so it listens on all interfaces — `php artisan serve` alone won't work on a physical device:
+```bash
+php artisan serve --host=0.0.0.0
+```
+6. Run:
+```bash
+flutter run --dart-define=API_URL=http://YOUR-IP:8000/api
+```
+
+Important: your Mac and Android device must be on the same Wi-Fi network.
+
+### Testing on a physical Android device (Windows)
+
+1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
+2. Enable USB Debugging in Developer Options
+3. Connect via USB
+4. Find your Windows IP address — run this in Command Prompt:
+```
+ipconfig
+```
+Look for **IPv4-adres** under your Wi-Fi adapter, e.g. `192.168.1.42`
+
+5. Start Laravel so it listens on all interfaces:
+```bash
+php artisan serve --host=0.0.0.0
+```
+6. Run:
+```bash
+flutter run --dart-define=API_URL=http://YOUR-IP:8000/api
+```
+
+Important: your PC and Android device must be on the same Wi-Fi network.
 
 ### Common issues
 
@@ -191,6 +220,7 @@ flutter run --dart-define=API_URL=http://<your-mac-ip>:8000/api
 | `command not found: flutter` | Flutter not in PATH, check installation |
 | App shows "Could not connect to API" | Make sure Laravel is running with `php artisan serve` |
 | App shows "Upload duurde te lang" | Check your network connection and if Laravel is running |
+| App shows "Inloggen duurde te lang" | Your device can't reach the server — use your PC's IP address instead of localhost, and start Laravel with `php artisan serve --host=0.0.0.0` |
 | iOS app crashes when switching apps | Normal iOS behavior, app restarts automatically |
 | iOS app crashes when changing permissions | Normal iOS behavior, app restarts automatically |
 | Android permission loop | Wipe app data in emulator settings and restart |
