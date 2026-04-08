@@ -23,8 +23,8 @@ class ApiService {
   final AuthService _authService;
 
   ApiService({http.Client? client, AuthService? authService})
-      : _client = client ?? http.Client(),
-        _authService = authService ?? AuthService();
+    : _client = client ?? http.Client(),
+      _authService = authService ?? AuthService();
 
   Future<Map<String, String>> _authHeaders({bool json = false}) async {
     final token = await _authService.getToken();
@@ -125,10 +125,7 @@ class ApiService {
   Future<Map<String, dynamic>> getProjects() async {
     try {
       final response = await _client
-          .get(
-            Uri.parse('$baseUrl/projects'),
-            headers: await _authHeaders(),
-          )
+          .get(Uri.parse('$baseUrl/projects'), headers: await _authHeaders())
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
