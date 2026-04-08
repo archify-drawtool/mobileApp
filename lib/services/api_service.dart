@@ -3,6 +3,14 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 
+class LoginResult {
+  final bool success;
+  final String? token;
+  final String? message;
+
+  const LoginResult({required this.success, this.token, this.message});
+}
+
 class ApiService {
   static const String baseUrl = String.fromEnvironment(
     'API_URL',
@@ -12,6 +20,67 @@ class ApiService {
   final http.Client _client;
 
   ApiService({http.Client? client}) : _client = client ?? http.Client();
+
+  Future<LoginResult> login({
+    required String email,
+    required String password,
+  }) async {
+    http.Response response;
+    try {
+      response = await _client
+          .post(
+            Uri.parse('$baseUrl/login'),
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 10));
+    } on SocketException {
+      return const LoginResult(
+        success: false,
+        message: 'Server is niet bereikbaar. Controleer je internetverbinding.',
+      );
+    } on TimeoutException {
+      return const LoginResult(
+        success: false,
+        message: 'Inloggen duurde te lang. Probeer het opnieuw.',
+      );
+    } catch (e) {
+      return const LoginResult(
+        success: false,
+        message: 'Kan geen verbinding maken met de server.',
+      );
+    }
+
+    try {
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && data['token'] is String) {
+        return LoginResult(success: true, token: data['token'] as String);
+      }
+
+      if (data['errors'] is Map) {
+        final errors = data['errors'] as Map<String, dynamic>;
+        final firstError = errors.values
+            .expand((v) => v is List ? v : [v])
+            .first;
+        return LoginResult(success: false, message: firstError.toString());
+      }
+
+      final message = data['message'] as String?;
+      return LoginResult(
+        success: false,
+        message: message ?? 'Inloggen mislukt (${response.statusCode}).',
+      );
+    } on FormatException {
+      return LoginResult(
+        success: false,
+        message: 'Ongeldig antwoord van de server (${response.statusCode}).',
+      );
+    }
+  }
 
   Future<String> checkHealth() async {
     try {
