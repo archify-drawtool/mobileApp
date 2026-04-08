@@ -70,5 +70,9 @@
   <string>Archify heeft toegang tot je galerij nodig om foto's te selecteren</string>
   <key>NSCameraUsageDescription</key>
   <string>Deze app heeft toegang tot je camera nodig.</string>
+  <key>LSApplicationQueriesSchemes</key>
+  <array>
+    <string>mailto</string>
+  </array>
 </dict>
 </plist>

@@ -210,5 +210,67 @@ void main() {
         expect(result['message'], isNotEmpty);
       });
     });
+
+    group('login', () {
+      test('should return token on 200 response', () async {
+        final client = MockClient((request) async {
+          expect(request.url.path, endsWith('/login'));
+          expect(request.headers['Content-Type'], contains('application/json'));
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['email'], 'john@example.com');
+          expect(body['password'], 'secret');
+          return http.Response(
+            jsonEncode({
+              'user': {'id': 1, 'email': 'john@example.com'},
+              'token': 'abc123',
+            }),
+            200,
+          );
+        });
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.login(
+          email: 'john@example.com',
+          password: 'secret',
+        );
+
+        expect(result.success, true);
+        expect(result.token, 'abc123');
+      });
+
+      test('should return validation error message on 422', () async {
+        final client = MockClient(
+          (_) async => http.Response(
+            jsonEncode({
+              'message': 'The given data was invalid.',
+              'errors': {
+                'email': ['De opgegeven credentials zijn onjuist.'],
+              },
+            }),
+            422,
+          ),
+        );
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.login(
+          email: 'john@example.com',
+          password: 'wrong',
+        );
+
+        expect(result.success, false);
+        expect(result.token, isNull);
+        expect(result.message, 'De opgegeven credentials zijn onjuist.');
+      });
+
+      test('should handle server errors gracefully', () async {
+        final client = MockClient(
+          (_) async => http.Response(jsonEncode({'message': 'oops'}), 500),
+        );
+        final apiService = ApiService(client: client);
+        final result = await apiService.login(email: 'a@b.nl', password: 'x');
+        expect(result.success, false);
+        expect(result.message, isNotEmpty);
+      });
+    });
   });
 }
