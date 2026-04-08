@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
 import 'package:archify_app/models/project.dart';
+import 'package:archify_app/services/auth_service.dart';
 
 class LoginResult {
   final bool success;
@@ -19,8 +20,20 @@ class ApiService {
   );
 
   final http.Client _client;
+  final AuthService _authService;
 
-  ApiService({http.Client? client}) : _client = client ?? http.Client();
+  ApiService({http.Client? client, AuthService? authService})
+      : _client = client ?? http.Client(),
+        _authService = authService ?? AuthService();
+
+  Future<Map<String, String>> _authHeaders({bool json = false}) async {
+    final token = await _authService.getToken();
+    return {
+      'Accept': 'application/json',
+      if (json) 'Content-Type': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+  }
 
   Future<LoginResult> login({
     required String email,
@@ -114,7 +127,7 @@ class ApiService {
       final response = await _client
           .get(
             Uri.parse('$baseUrl/projects'),
-            headers: {'Accept': 'application/json'},
+            headers: await _authHeaders(),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -122,6 +135,13 @@ class ApiService {
         final List<dynamic> data = jsonDecode(response.body);
         final projects = data.map((json) => Project.fromJson(json)).toList();
         return {'success': true, 'projects': projects};
+      } else if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
       } else {
         return {
           'success': false,
@@ -161,7 +181,7 @@ class ApiService {
         Uri.parse('$baseUrl/photos/upload'),
       );
 
-      request.headers['Accept'] = 'application/json';
+      request.headers.addAll(await _authHeaders());
       request.fields['project_id'] = projectId.toString();
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
@@ -189,6 +209,15 @@ class ApiService {
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return {'success': true, 'message': data['message']};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
       }
 
       String errorMessage;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
 import 'package:archify_app/services/photo_service.dart';
@@ -41,6 +42,11 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
 
     if (!mounted) return;
 
+    if (result['unauthorized'] == true) {
+      await AuthGate.logoutAndRedirect(context);
+      return;
+    }
+
     if (result['success']) {
       final projects = result['projects'] as List<Project>;
       setState(() {
@@ -69,6 +75,11 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     await _photoService.cleanupFixedPhoto(fixedPath);
 
     if (!mounted) return;
+
+    if (result['unauthorized'] == true) {
+      await AuthGate.logoutAndRedirect(context);
+      return;
+    }
 
     setState(() => _isUploading = false);
 
