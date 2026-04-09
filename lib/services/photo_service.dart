@@ -12,7 +12,9 @@ class PhotoService {
     final oriented = img.bakeOrientation(image);
 
     const maxLongSide = 1920;
-    final longestSide = oriented.width > oriented.height ? oriented.width : oriented.height;
+    final longestSide = oriented.width > oriented.height
+        ? oriented.width
+        : oriented.height;
     final resized = longestSide > maxLongSide
         ? img.copyResize(
             oriented,
