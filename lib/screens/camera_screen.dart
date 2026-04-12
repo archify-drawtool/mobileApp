@@ -1,3 +1,4 @@
+import 'package:archify_app/main.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,37 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
+  Future<void> _onLogout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.darkNavy,
+        title: const Text(
+          'Uitloggen',
+          style: TextStyle(color: AppColors.white),
+        ),
+        content: const Text(
+          'Weet je zeker dat je wilt uitloggen?',
+          style: TextStyle(color: AppColors.grey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuleren'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Uitloggen'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await AuthGate.logoutAndRedirect(context);
+    }
+  }
+
   Future<void> _onPickFromGallery() async {
     final photo = await _imagePicker.pickImage(source: ImageSource.gallery);
     if (photo != null && mounted) {
@@ -187,7 +219,30 @@ class _CameraScreenState extends State<CameraScreen>
                   ),
                 ),
               ),
-              const Expanded(child: SizedBox()),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 24),
+                    child: GestureDetector(
+                      onTap: _onLogout,
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          LucideIcons.logOut,
+                          color: AppColors.grey,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 40),

@@ -82,6 +82,20 @@ class ApiService {
     }
   }
 
+  Future<void> logout(String token) async {
+    try {
+      await _client
+          .post(
+            Uri.parse('$baseUrl/logout'),
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
   Future<String> checkHealth() async {
     try {
       final response = await _client

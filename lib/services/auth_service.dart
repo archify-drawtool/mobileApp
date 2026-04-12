@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:archify_app/services/api_service.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
@@ -21,5 +22,13 @@ class AuthService {
   Future<bool> isLoggedIn() async {
     final token = await getToken();
     return token != null && token.isNotEmpty;
+  }
+
+  Future<void> logout() async {
+    final token = await getToken();
+    if (token != null) {
+      await ApiService().logout(token);
+    }
+    await clearToken();
   }
 }

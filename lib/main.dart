@@ -31,7 +31,7 @@ class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
   static Future<void> logoutAndRedirect(BuildContext context) async {
-    await AuthService().clearToken();
+    await AuthService().logout();
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
