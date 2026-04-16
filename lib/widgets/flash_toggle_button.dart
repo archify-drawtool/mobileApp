@@ -34,7 +34,7 @@ class FlashToggleButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.darkNavy.withOpacity(0.6),
+          color: AppColors.darkNavy.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Stack(
@@ -48,7 +48,7 @@ class FlashToggleButton extends StatelessWidget {
               size: 20,
             ),
             if (currentMode == FlashMode.auto)
-              Positioned(
+              const Positioned(
                 bottom: 4,
                 right: 4,
                 child: Text(

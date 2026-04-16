@@ -35,11 +35,7 @@ class CameraPreviewBox extends StatelessWidget {
                 ),
               ),
               if (topRightOverlay != null)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: topRightOverlay!,
-                ),
+                Positioned(top: 12, right: 12, child: topRightOverlay!),
             ],
           ),
         ),
