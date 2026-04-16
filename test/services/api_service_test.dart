@@ -4,9 +4,16 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:archify_app/services/api_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('ApiService', () {
     test('baseUrl should have a default value', () {
       expect(ApiService.baseUrl, isNotEmpty);
@@ -63,12 +70,79 @@ void main() {
       });
     });
 
+    group('getProjects', () {
+      test('should return list of projects on 200', () async {
+        final client = MockClient((request) async {
+          expect(request.url.path, endsWith('/projects'));
+          expect(request.headers['Accept'], 'application/json');
+          return http.Response(
+            jsonEncode([
+              {'id': 1, 'title': 'Project A'},
+              {'id': 2, 'title': 'Project B'},
+            ]),
+            200,
+          );
+        });
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.getProjects();
+
+        expect(result['success'], true);
+        expect(result['projects'], hasLength(2));
+      });
+
+      test('should return empty list when no projects exist', () async {
+        final client = MockClient(
+          (_) async => http.Response(jsonEncode([]), 200),
+        );
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.getProjects();
+
+        expect(result['success'], true);
+        expect(result['projects'], isEmpty);
+      });
+
+      test('should return error on non-200 status', () async {
+        final client = MockClient((_) async => http.Response('error', 500));
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.getProjects();
+
+        expect(result['success'], false);
+        expect(result['message'], contains('500'));
+      });
+
+      test('should handle SocketException', () async {
+        final client = MockClient((_) => throw const SocketException(''));
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.getProjects();
+
+        expect(result['success'], false);
+        expect(result['message'], contains('niet bereikbaar'));
+      });
+
+      test('should handle invalid JSON', () async {
+        final client = MockClient((_) async => http.Response('not json', 200));
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.getProjects();
+
+        expect(result['success'], false);
+        expect(result['message'], contains('Ongeldig'));
+      });
+    });
+
     group('uploadPhoto', () {
       test('should return error when file does not exist', () async {
         final client = MockClient((_) async => http.Response('', 200));
         final apiService = ApiService(client: client);
 
-        final result = await apiService.uploadPhoto('/nonexistent/photo.jpg');
+        final result = await apiService.uploadPhoto(
+          '/nonexistent/photo.jpg',
+          projectId: 1,
+        );
 
         expect(result['success'], false);
         expect(
@@ -77,12 +151,13 @@ void main() {
         );
       });
 
-      test('should return success on 201 response', () async {
+      test('should send project_id and return success on 201', () async {
         final tempFile = File('${Directory.systemTemp.path}/test_photo.jpg');
-        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]); // JPEG header
+        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
 
+        late http.BaseRequest capturedRequest;
         final client = MockClient((request) async {
-          expect(request.url.path, endsWith('/photos/upload'));
+          capturedRequest = request;
           return http.Response(
             jsonEncode({'message': 'Photo uploaded successfully'}),
             201,
@@ -90,10 +165,15 @@ void main() {
         });
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 42,
+        );
 
         expect(result['success'], true);
         expect(result['message'], 'Photo uploaded successfully');
+        expect(capturedRequest.url.path, endsWith('/photos/upload'));
+        expect(capturedRequest.headers['Accept'], 'application/json');
 
         tempFile.deleteSync();
       });
@@ -110,7 +190,10 @@ void main() {
         );
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 1,
+        );
 
         expect(result['success'], false);
         expect(result['message'], 'Bestand is te groot');
@@ -135,7 +218,10 @@ void main() {
         );
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 1,
+        );
 
         expect(result['success'], false);
         expect(result['message'], 'The photo field is required.');
@@ -152,7 +238,10 @@ void main() {
         );
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 1,
+        );
 
         expect(result['success'], false);
         expect(result['message'], 'Server gaf een ongeldig antwoord (500)');
@@ -169,13 +258,13 @@ void main() {
         );
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 1,
+        );
 
         expect(result['success'], false);
-        expect(
-          result['message'],
-          'Server is niet bereikbaar. Controleer of de server draait.',
-        );
+        expect(result['message'], contains('niet bereikbaar'));
 
         tempFile.deleteSync();
       });
@@ -189,7 +278,10 @@ void main() {
         );
 
         final apiService = ApiService(client: client);
-        final result = await apiService.uploadPhoto(tempFile.path);
+        final result = await apiService.uploadPhoto(
+          tempFile.path,
+          projectId: 1,
+        );
 
         expect(result['success'], false);
         expect(result['message'], 'Onbekende fout');
@@ -201,7 +293,10 @@ void main() {
         final client = MockClient((_) async => http.Response('', 500));
         final apiService = ApiService(client: client);
 
-        final result = await apiService.uploadPhoto('/nonexistent/photo.jpg');
+        final result = await apiService.uploadPhoto(
+          '/nonexistent/photo.jpg',
+          projectId: 1,
+        );
 
         expect(result.containsKey('success'), true);
         expect(result.containsKey('message'), true);

@@ -2,6 +2,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io';
+import 'package:archify_app/models/project.dart';
+import 'package:archify_app/services/auth_service.dart';
 
 class LoginResult {
   final bool success;
@@ -18,8 +20,20 @@ class ApiService {
   );
 
   final http.Client _client;
+  final AuthService _authService;
 
-  ApiService({http.Client? client}) : _client = client ?? http.Client();
+  ApiService({http.Client? client, AuthService? authService})
+    : _client = client ?? http.Client(),
+      _authService = authService ?? AuthService();
+
+  Future<Map<String, String>> _authHeaders({bool json = false}) async {
+    final token = await _authService.getToken();
+    return {
+      'Accept': 'application/json',
+      if (json) 'Content-Type': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
+  }
 
   Future<LoginResult> login({
     required String email,
@@ -108,7 +122,50 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> uploadPhoto(String photoPath) async {
+  Future<Map<String, dynamic>> getProjects() async {
+    try {
+      final response = await _client
+          .get(Uri.parse('$baseUrl/projects'), headers: await _authHeaders())
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        final projects = data.map((json) => Project.fromJson(json)).toList();
+        return {'success': true, 'projects': projects};
+      } else if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Kon projecten niet ophalen (${response.statusCode})',
+        };
+      }
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar. Controleer of de server draait.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message': 'Verbinding duurde te lang. Probeer het later opnieuw.',
+      };
+    } on FormatException {
+      return {'success': false, 'message': 'Ongeldig antwoord van de server.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Kan niet verbinden met de server'};
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadPhoto(
+    String photoPath, {
+    required int projectId,
+  }) async {
     final file = File(photoPath);
     if (!await file.exists()) {
       return {'success': false, 'message': 'Bestand niet gevonden: $photoPath'};
@@ -121,7 +178,8 @@ class ApiService {
         Uri.parse('$baseUrl/photos/upload'),
       );
 
-      request.headers['Accept'] = 'application/json';
+      request.headers.addAll(await _authHeaders());
+      request.fields['project_id'] = projectId.toString();
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       streamedResponse = await _client
@@ -148,6 +206,15 @@ class ApiService {
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
         return {'success': true, 'message': data['message']};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
       }
 
       String errorMessage;

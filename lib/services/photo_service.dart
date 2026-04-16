@@ -9,8 +9,21 @@ class PhotoService {
 
     if (image == null) return photoPath;
 
-    final fixed = img.bakeOrientation(image);
-    final fixedBytes = img.encodeJpg(fixed, quality: 95);
+    final oriented = img.bakeOrientation(image);
+
+    const maxLongSide = 1920;
+    final longestSide = oriented.width > oriented.height
+        ? oriented.width
+        : oriented.height;
+    final resized = longestSide > maxLongSide
+        ? img.copyResize(
+            oriented,
+            width: oriented.width > oriented.height ? maxLongSide : null,
+            height: oriented.height >= oriented.width ? maxLongSide : null,
+          )
+        : oriented;
+
+    final fixedBytes = img.encodeJpg(resized, quality: 85);
 
     final fixedPath = '${photoPath}_fixed.jpg';
     await File(fixedPath).writeAsBytes(fixedBytes);
