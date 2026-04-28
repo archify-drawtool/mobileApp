@@ -9,6 +9,7 @@ import 'package:archify_app/screens/photo_preview_screen.dart';
 import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/camera_preview_box.dart';
+import 'package:archify_app/widgets/flash_toggle_button.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -24,6 +25,8 @@ class _CameraScreenState extends State<CameraScreen>
   bool _isReady = false;
   bool _isNavigating = false;
   bool _isInitializing = false;
+  FlashMode _flashMode = FlashMode.off;
+  bool _hasFlash = false;
 
   @override
   void initState() {
@@ -76,8 +79,22 @@ class _CameraScreenState extends State<CameraScreen>
       await _controller!.initialize();
       await _controller!.lockCaptureOrientation(DeviceOrientation.portraitUp);
 
+      bool hasFlash = false;
+      if (cameras.first.lensDirection == CameraLensDirection.back) {
+        try {
+          await _controller!.setFlashMode(FlashMode.off);
+          hasFlash = true;
+        } catch (_) {
+          hasFlash = false;
+        }
+      }
+
       if (mounted && !_isNavigating) {
-        setState(() => _isReady = true);
+        setState(() {
+          _isReady = true;
+          _hasFlash = hasFlash;
+          _flashMode = FlashMode.off;
+        });
       }
     } catch (e) {
       if (mounted && !_isNavigating) {
@@ -90,6 +107,12 @@ class _CameraScreenState extends State<CameraScreen>
     } finally {
       _isInitializing = false;
     }
+  }
+
+  Future<void> _onToggleFlash() async {
+    final next = nextFlashMode(_flashMode);
+    await _controller!.setFlashMode(next);
+    setState(() => _flashMode = next);
   }
 
   Future<void> _onTakePhoto() async {
@@ -143,7 +166,17 @@ class _CameraScreenState extends State<CameraScreen>
           const SizedBox(height: 4),
           const Text('Richt op de toolkit', style: AppTextStyles.body),
           const SizedBox(height: 16),
-          Expanded(child: CameraPreviewBox(controller: _controller!)),
+          Expanded(
+            child: CameraPreviewBox(
+              controller: _controller!,
+              topRightOverlay: _hasFlash
+                  ? FlashToggleButton(
+                      currentMode: _flashMode,
+                      onTap: _onToggleFlash,
+                    )
+                  : null,
+            ),
+          ),
           const SizedBox(height: 24),
           Row(
             children: [
