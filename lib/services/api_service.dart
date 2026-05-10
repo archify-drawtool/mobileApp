@@ -280,15 +280,9 @@ class ApiService {
         'message': 'Status ophalen mislukt (${response.statusCode})',
       };
     } on SocketException {
-      return {
-        'success': false,
-        'message': 'Server is niet bereikbaar.',
-      };
+      return {'success': false, 'message': 'Server is niet bereikbaar.'};
     } on TimeoutException {
-      return {
-        'success': false,
-        'message': 'Status ophalen duurde te lang.',
-      };
+      return {'success': false, 'message': 'Status ophalen duurde te lang.'};
     } catch (e) {
       return {'success': false, 'message': 'Fout: $e'};
     }
@@ -327,15 +321,9 @@ class ApiService {
         'message': 'Delen mislukt (${response.statusCode})',
       };
     } on SocketException {
-      return {
-        'success': false,
-        'message': 'Server is niet bereikbaar.',
-      };
+      return {'success': false, 'message': 'Server is niet bereikbaar.'};
     } on TimeoutException {
-      return {
-        'success': false,
-        'message': 'Delen duurde te lang.',
-      };
+      return {'success': false, 'message': 'Delen duurde te lang.'};
     } catch (e) {
       return {'success': false, 'message': 'Fout: $e'};
     }

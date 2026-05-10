@@ -97,9 +97,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Upload mislukt: ${result['message']}'),
-      ),
+      SnackBar(content: Text('Upload mislukt: ${result['message']}')),
     );
   }
 

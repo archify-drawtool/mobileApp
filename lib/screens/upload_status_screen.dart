@@ -105,7 +105,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
 
     final elapsed = DateTime.now().difference(_pollStartedAt!);
     if (elapsed >= _pollTimeout) {
-      _failWith('Verwerking duurt langer dan verwacht. Probeer het later opnieuw.');
+      _failWith(
+        'Verwerking duurt langer dan verwacht. Probeer het later opnieuw.',
+      );
       return;
     }
 
@@ -151,9 +153,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
 
     final token = result['token'] as String?;
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Geen deellink ontvangen.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Geen deellink ontvangen.')));
       return;
     }
 
@@ -201,9 +203,7 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Center(child: _buildStageContent()),
-              ),
+              Expanded(child: Center(child: _buildStageContent())),
               if (_stage == _Stage.completed) _buildCompletedActions(),
               if (_stage == _Stage.failed) _buildFailedActions(),
             ],
@@ -246,7 +246,8 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
           iconColor: AppColors.magenta,
           title: 'Verwerking mislukt',
           subtitle:
-              _errorMessage ?? 'Er ging iets mis bij het verwerken van je foto.',
+              _errorMessage ??
+              'Er ging iets mis bij het verwerken van je foto.',
         );
     }
   }
@@ -319,17 +320,9 @@ class _StatusBlock extends StatelessWidget {
       children: [
         Icon(icon, color: iconColor, size: 56),
         const SizedBox(height: 24),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.heading,
-        ),
+        Text(title, textAlign: TextAlign.center, style: AppTextStyles.heading),
         const SizedBox(height: 12),
-        Text(
-          subtitle,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.body,
-        ),
+        Text(subtitle, textAlign: TextAlign.center, style: AppTextStyles.body),
         if (showSpinner) ...[
           const SizedBox(height: 32),
           const CircularProgressIndicator(color: AppColors.magenta),
