@@ -19,6 +19,11 @@ class ApiService {
     defaultValue: 'http://localhost:8000/api',
   );
 
+  static const String webAppUrl = String.fromEnvironment(
+    'WEB_APP_URL',
+    defaultValue: 'http://localhost:3000',
+  );
+
   final http.Client _client;
   final AuthService _authService;
 
@@ -205,7 +210,12 @@ class ApiService {
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        return {'success': true, 'message': data['message']};
+        return {
+          'success': true,
+          'message': data['message'],
+          'photo_id': data['photo_id'],
+          'status': data['status'],
+        };
       }
 
       if (response.statusCode == 401) {
@@ -239,6 +249,95 @@ class ApiService {
         'success': false,
         'message': 'Fout bij verwerken van server-antwoord: $e',
       };
+    }
+  }
+
+  Future<Map<String, dynamic>> getPhotoStatus(int photoId) async {
+    try {
+      final response = await _client
+          .get(
+            Uri.parse('$baseUrl/photos/$photoId/status'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return {'success': true, ...data};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Status ophalen mislukt (${response.statusCode})',
+      };
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message': 'Status ophalen duurde te lang.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Fout: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> enableShareLink({
+    required int projectId,
+    required int sketchId,
+  }) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse(
+              '$baseUrl/projects/$projectId/sketches/$sketchId/share/enable',
+            ),
+            headers: await _authHeaders(json: true),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return {'success': true, ...data};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Delen mislukt (${response.statusCode})',
+      };
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message': 'Delen duurde te lang.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Fout: $e'};
     }
   }
 }

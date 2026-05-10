@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
+import 'package:archify_app/screens/upload_status_screen.dart';
 import 'package:archify_app/services/photo_service.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
@@ -83,19 +84,23 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
 
     setState(() => _isUploading = false);
 
+    if (result['success'] == true && result['photo_id'] is int) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => UploadStatusScreen(
+            photoId: result['photo_id'] as int,
+            projectId: _selectedProject!.id,
+          ),
+        ),
+      );
+      return;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          result['success']
-              ? 'Foto is succesvol geüpload'
-              : 'Upload mislukt: ${result['message']}',
-        ),
+        content: Text('Upload mislukt: ${result['message']}'),
       ),
     );
-
-    if (result['success']) {
-      Navigator.popUntil(context, (route) => route.isFirst);
-    }
   }
 
   @override
