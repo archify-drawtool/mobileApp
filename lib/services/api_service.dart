@@ -287,45 +287,4 @@ class ApiService {
       return {'success': false, 'message': 'Fout: $e'};
     }
   }
-
-  Future<Map<String, dynamic>> enableShareLink({
-    required int projectId,
-    required int sketchId,
-  }) async {
-    try {
-      final response = await _client
-          .post(
-            Uri.parse(
-              '$baseUrl/projects/$projectId/sketches/$sketchId/share/enable',
-            ),
-            headers: await _authHeaders(json: true),
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return {'success': true, ...data};
-      }
-
-      if (response.statusCode == 401) {
-        await _authService.clearToken();
-        return {
-          'success': false,
-          'unauthorized': true,
-          'message': 'Je sessie is verlopen. Log opnieuw in.',
-        };
-      }
-
-      return {
-        'success': false,
-        'message': 'Delen mislukt (${response.statusCode})',
-      };
-    } on SocketException {
-      return {'success': false, 'message': 'Server is niet bereikbaar.'};
-    } on TimeoutException {
-      return {'success': false, 'message': 'Delen duurde te lang.'};
-    } catch (e) {
-      return {'success': false, 'message': 'Fout: $e'};
-    }
-  }
 }

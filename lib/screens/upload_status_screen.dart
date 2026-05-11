@@ -38,7 +38,6 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
   int? _edgesCount;
   int? _sketchId;
   String? _errorMessage;
-  bool _isSharing = false;
 
   Timer? _pollTimer;
   DateTime? _pollStartedAt;
@@ -126,18 +125,13 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
   // ── Actions ────────────────────────────────────────────────────
 
   Future<void> _onShare() async {
-    if (_sketchId == null || _isSharing) return;
-
-    setState(() => _isSharing = true);
+    if (_sketchId == null) return;
 
     await _shareService.shareSketch(
-      context: context,
       projectId: widget.projectId,
       sketchId: _sketchId!,
       shareOrigin: _shareOriginRect(),
     );
-
-    if (mounted) setState(() => _isSharing = false);
   }
 
   Rect _shareOriginRect() {
@@ -231,18 +225,9 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
           key: _shareButtonKey,
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: _isSharing ? null : _onShare,
-            icon: _isSharing
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.white,
-                    ),
-                  )
-                : const Icon(LucideIcons.share2, size: 18),
-            label: Text(_isSharing ? 'Link aanmaken...' : 'Schets delen'),
+            onPressed: _onShare,
+            icon: const Icon(LucideIcons.share2, size: 18),
+            label: const Text('Schets delen'),
           ),
         ),
         const SizedBox(height: 12),
@@ -269,4 +254,3 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
     );
   }
 }
-

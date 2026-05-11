@@ -35,4 +35,3 @@ class StatusBlock extends StatelessWidget {
     );
   }
 }
-
