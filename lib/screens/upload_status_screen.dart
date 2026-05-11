@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:archify_app/main.dart';
+import 'package:archify_app/models/upload_stage.dart';
 import 'package:archify_app/services/api_service.dart';
+import 'package:archify_app/services/share_service.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
-
-enum _Stage { uploaded, processing, completed, failed }
+import 'package:archify_app/widgets/status_block.dart';
 
 class UploadStatusScreen extends StatefulWidget {
   final int photoId;
@@ -30,9 +30,10 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
   static const Duration _uploadedHold = Duration(milliseconds: 1500);
 
   final ApiService _apiService = ApiService();
+  final ShareService _shareService = ShareService();
   final GlobalKey _shareButtonKey = GlobalKey();
 
-  _Stage _stage = _Stage.uploaded;
+  UploadStage _stage = UploadStage.uploaded;
   int? _nodesCount;
   int? _edgesCount;
   int? _sketchId;
@@ -54,11 +55,13 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
     super.dispose();
   }
 
+  // ── Polling logic ──────────────────────────────────────────────
+
   Future<void> _runFlow() async {
     await Future.delayed(_uploadedHold);
     if (!mounted) return;
 
-    setState(() => _stage = _Stage.processing);
+    setState(() => _stage = UploadStage.processing);
     _pollStartedAt = DateTime.now();
     _scheduleNextPoll();
   }
@@ -71,7 +74,6 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
     if (!mounted) return;
 
     final result = await _apiService.getPhotoStatus(widget.photoId);
-
     if (!mounted) return;
 
     if (result['unauthorized'] == true) {
@@ -87,7 +89,7 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
     final status = result['status'] as String?;
     if (status == 'completed') {
       setState(() {
-        _stage = _Stage.completed;
+        _stage = UploadStage.completed;
         _nodesCount = (result['nodes_count'] as int?) ?? 0;
         _edgesCount = (result['edges_count'] as int?) ?? 0;
         _sketchId = result['sketch_id'] as int?;
@@ -116,58 +118,26 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
 
   void _failWith(String message) {
     setState(() {
-      _stage = _Stage.failed;
+      _stage = UploadStage.failed;
       _errorMessage = message;
     });
   }
+
+  // ── Actions ────────────────────────────────────────────────────
 
   Future<void> _onShare() async {
     if (_sketchId == null || _isSharing) return;
 
     setState(() => _isSharing = true);
 
-    final result = await _apiService.enableShareLink(
+    await _shareService.shareSketch(
+      context: context,
       projectId: widget.projectId,
       sketchId: _sketchId!,
+      shareOrigin: _shareOriginRect(),
     );
 
-    if (!mounted) return;
-
-    if (result['unauthorized'] == true) {
-      await AuthGate.logoutAndRedirect(context);
-      return;
-    }
-
-    setState(() => _isSharing = false);
-
-    if (result['success'] != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Delen mislukt: ${result['message'] ?? 'onbekende fout'}',
-          ),
-        ),
-      );
-      return;
-    }
-
-    final token = result['token'] as String?;
-    if (token == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Geen deellink ontvangen.')));
-      return;
-    }
-
-    final shareUrl = '${ApiService.webAppUrl}/gedeeld/$token';
-
-    await SharePlus.instance.share(
-      ShareParams(
-        text: shareUrl,
-        subject: 'Bekijk mijn schets in Archify',
-        sharePositionOrigin: _shareOriginRect(),
-      ),
-    );
+    if (mounted) setState(() => _isSharing = false);
   }
 
   Rect _shareOriginRect() {
@@ -189,6 +159,8 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
     Navigator.popUntil(context, (route) => route.isFirst);
   }
 
+  // ── UI ─────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,8 +176,8 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(child: Center(child: _buildStageContent())),
-              if (_stage == _Stage.completed) _buildCompletedActions(),
-              if (_stage == _Stage.failed) _buildFailedActions(),
+              if (_stage == UploadStage.completed) _buildCompletedActions(),
+              if (_stage == UploadStage.failed) _buildFailedActions(),
             ],
           ),
         ),
@@ -215,16 +187,16 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
 
   Widget _buildStageContent() {
     switch (_stage) {
-      case _Stage.uploaded:
-        return const _StatusBlock(
+      case UploadStage.uploaded:
+        return const StatusBlock(
           icon: LucideIcons.uploadCloud,
           iconColor: AppColors.magenta,
           title: 'Foto succesvol geüpload',
           subtitle: 'Een moment, we beginnen met verwerken...',
           showSpinner: true,
         );
-      case _Stage.processing:
-        return const _StatusBlock(
+      case UploadStage.processing:
+        return const StatusBlock(
           icon: LucideIcons.loader,
           iconColor: AppColors.magenta,
           title: 'Bezig met verwerken...',
@@ -232,16 +204,16 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
               'We detecteren je nodes en pijlen. Dit duurt meestal een paar seconden.',
           showSpinner: true,
         );
-      case _Stage.completed:
-        return _StatusBlock(
+      case UploadStage.completed:
+        return StatusBlock(
           icon: LucideIcons.checkCircle2,
           iconColor: AppColors.magenta,
           title: 'Foto succesvol verwerkt',
           subtitle:
               '${_nodesCount ?? 0} nodes en ${_edgesCount ?? 0} pijlen gedetecteerd',
         );
-      case _Stage.failed:
-        return _StatusBlock(
+      case UploadStage.failed:
+        return StatusBlock(
           icon: LucideIcons.alertTriangle,
           iconColor: AppColors.magenta,
           title: 'Verwerking mislukt',
@@ -298,36 +270,3 @@ class _UploadStatusScreenState extends State<UploadStatusScreen> {
   }
 }
 
-class _StatusBlock extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final bool showSpinner;
-
-  const _StatusBlock({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    this.showSpinner = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: iconColor, size: 56),
-        const SizedBox(height: 24),
-        Text(title, textAlign: TextAlign.center, style: AppTextStyles.heading),
-        const SizedBox(height: 12),
-        Text(subtitle, textAlign: TextAlign.center, style: AppTextStyles.body),
-        if (showSpinner) ...[
-          const SizedBox(height: 32),
-          const CircularProgressIndicator(color: AppColors.magenta),
-        ],
-      ],
-    );
-  }
-}
