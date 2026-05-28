@@ -2,272 +2,144 @@
 
 The Archify Mobile App for capturing and digitizing IT landscape sketches during client sessions.
 
+## ⚠️ Belangrijk
+
+Naast `php artisan serve` moet je in een aparte terminal ook **`php artisan queue:work`** draaien in `webApi`. Zonder de queue worker blijven geüploade foto's eindeloos op `processing` staan en worden er nooit schetsen aangemaakt.
+
 ## Project Structure
 
 ```
 lib/
 ├── main.dart              # App entry point
 ├── screens/               # Full-screen pages
-│   ├── login_screen.dart             # Login form
-│   ├── camera_screen.dart            # Camera with live preview
-│   ├── camera_permission_screen.dart # First-launch permission request
-│   ├── camera_denied_screen.dart     # Shown when camera is denied
-│   └── photo_preview_screen.dart     # Preview with accept/retake
+│   ├── login_screen.dart
+│   ├── project_selection_screen.dart
+│   ├── camera_screen.dart
+│   ├── camera_permission_screen.dart
+│   ├── camera_denied_screen.dart
+│   ├── photo_preview_screen.dart
+│   └── upload_status_screen.dart
 ├── services/              # API and business logic
-│   ├── api_service.dart              # API calls (health check, login, photo upload)
-│   ├── auth_service.dart             # Token storage via shared_preferences
-│   └── photo_service.dart            # Photo orientation fix
+│   ├── api_service.dart
+│   ├── auth_service.dart
+│   ├── photo_service.dart
+│   └── share_service.dart
 ├── widgets/               # Reusable UI components
-│   ├── archify_logo.dart             # Logo with colored "fy"
-│   ├── screen_badge.dart             # Badge in top right (CAMERA, PREVIEW)
-│   ├── camera_preview_box.dart       # Camera preview with border
-│   └── photo_preview_box.dart        # Photo preview with border
+│   ├── archify_logo.dart
+│   ├── screen_badge.dart
+│   ├── camera_preview_box.dart
+│   ├── photo_preview_box.dart
+│   ├── flash_toggle_button.dart
+│   └── status_block.dart
 ├── theme/                 # Colors, text styles, theme
-│   └── app_theme.dart                # AppColors, AppTextStyles, AppTheme
-└── models/                # Data models (future)
+│   └── app_theme.dart
+└── models/                # Data models
+    ├── project.dart
+    └── upload_stage.dart
 ```
 
 ## Getting Started
 
 ### 1. Prerequisites
 
-Make sure you have the following installed:
-
 - [Flutter SDK](https://docs.flutter.dev/get-started/install)
-- [Android Studio](https://developer.android.com/studio) (for Android emulator, required on all platforms)
-- Xcode (Mac only, for iOS simulator and physical iPhone testing)
-- A code editor (IntelliJ IDEA, VS Code, or Android Studio)
+- [Android Studio](https://developer.android.com/studio) (for Android emulator)
+- Xcode (Mac only, for iOS)
 
-### 2. Verify installation
+Run `flutter doctor` to verify your setup.
 
-Run this in your terminal to check if everything is set up correctly:
-
-```bash
-flutter doctor
-```
-
-All checkmarks should be green. If something is missing, follow the instructions it gives you.
-
-### 3. Clone and install
+### 2. Install dependencies
 
 ```bash
-git clone https://github.com/archify-cbyte/mobileApp.git
 cd mobileApp
 flutter pub get
 ```
 
-`flutter pub get` installs all packages listed in `pubspec.yaml`. Similar to `npm install` in Nuxt or `composer install` in Laravel. You need to run this every time you pull new changes that added packages.
+### 3. Set up an Android emulator
 
-### 4. Set up an Android emulator
+1. Open Android Studio → Device Manager
+2. Create a virtual device (e.g. Pixel 8) and start it
 
-1. Open Android Studio
-2. Go to Device Manager (phone icon in the right sidebar)
-3. Click "Create Virtual Device"
-4. Choose a phone (e.g. Pixel 8)
-5. Select an Android version and click Finish
-6. Start the emulator with the play button
+### 4. Run the backend
+
+In `webApi`, in two separate terminals:
+
+```bash
+php artisan serve
+php artisan queue:work
+```
 
 ### 5. Run the app
 
-The app needs to know where the Laravel API is running. You pass this as an environment variable:
-
-**Android emulator (Windows or Mac):**
+**Android emulator:**
 ```bash
 flutter run --dart-define=API_URL=http://10.0.2.2:8000/api
 ```
 
-Why `10.0.2.2`? The Android emulator can't use `localhost` because that points to the emulator itself. `10.0.2.2` is a special address that points to your computer.
+`10.0.2.2` is the Android emulator's alias for your host machine's `localhost`.
 
 **iOS simulator (Mac only):**
 ```bash
 flutter run --dart-define=API_URL=http://localhost:8000/api
 ```
 
-If you don't pass `--dart-define`, the app defaults to `http://localhost:8000/api`.
+Default (when `--dart-define` is omitted): `http://localhost:8000/api`.
 
-### 6. Make sure the backend is running
-
-The app connects to the Laravel API. Without it running, photo uploads won't work and you'll see "Could not connect to API". In a separate terminal:
-
-```bash
-cd webApi
-php artisan serve
-```
-
-If you use Laravel Herd, the API is already running automatically.
-
-## Debugging Guide
-
-### Which device should I use?
-
-| Situation | Best option |
-|---|---|
-| Daily development | Android emulator |
-| Camera testing on Android | Android emulator (has simulated camera) |
-| Camera testing on iOS | Physical iPhone in release mode |
-| UI testing on iOS | iOS simulator (no camera available) |
-| Testing photo upload | Android emulator with Laravel running |
-
-For most development, use the Android emulator. It has a simulated camera, supports hot reload, and doesn't have the iOS debug limitations.
+## Debugging
 
 ### Hot reload
 
-While the app is running via `flutter run`, you can:
+While `flutter run` is active:
 
-- Press **r** for hot reload (instant UI updates, keeps state)
-- Press **R** for hot restart (restarts the app, resets state)
-- Press **q** to quit
+- **r** — hot reload (keeps state)
+- **R** — hot restart (resets state)
+- **q** — quit
 
-This is the fastest way to see your changes.
+### Testing on a physical device
 
-### Running on Android emulator
+iOS debug mode kills camera apps when you switch away — use release mode instead.
 
-1. Open Android Studio → Device Manager → Start an emulator
-2. Run:
-```bash
-flutter run --dart-define=API_URL=http://10.0.2.2:8000/api
-```
-
-### Running on iOS simulator
-
-1. Open the simulator:
-```bash
-open -a Simulator
-```
-2. Run:
-```bash
-flutter run --dart-define=API_URL=http://localhost:8000/api
-```
-
-Note: camera is not available in the iOS simulator. You can test the rest of the UI but not the actual camera.
-
-### Testing on a physical iPhone (Mac)
-
-Debug mode on iOS has known limitations with camera apps — iOS kills the app when you switch away. Use release mode instead:
-
-1. Find your Mac's IP address:
+1. Find your Mac's IP:
 ```bash
 ipconfig getifaddr en0
 ```
 
-2. Start Laravel so it listens on all interfaces:
+2. Start Laravel on all interfaces:
 ```bash
 php artisan serve --host=0.0.0.0
 ```
 
-3. Build the app with your IP:
+3. **iOS:** build and open in Xcode:
 ```bash
 flutter build ios --release --dart-define=API_URL=http://YOUR-IP:8000/api
-```
-
-4. Open Xcode:
-```bash
 open ios/Runner.xcworkspace
 ```
+Set scheme to **Release**, select your iPhone, **Product → Run**.
 
-5. In Xcode: set scheme to **Release**, select your iPhone, then **Product → Run**
+3. **Android:**
+   1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
+   2. Enable USB Debugging in Developer Options
+   3. Connect via USB and accept the debugging prompt on your phone
+   4. Run:
+   ```bash
+   flutter run --dart-define=API_URL=http://YOUR-IP:8000/api
+   ```
 
-Important: your Mac and iPhone must be on the same Wi-Fi network.
+Your computer and device must be on the same Wi-Fi network.
 
-Note: with a free Apple developer account, the app expires after 7 days and needs to be reinstalled.
-
-### Testing on a physical Android device (Mac)
-
-1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
-2. Enable USB Debugging in Developer Options
-3. Connect via USB
-4. Find your Mac's IP address:
-```bash
-ipconfig getifaddr en0
-```
-5. Start Laravel so it listens on all interfaces — `php artisan serve` alone won't work on a physical device:
-```bash
-php artisan serve --host=0.0.0.0
-```
-6. Run:
-```bash
-flutter run --dart-define=API_URL=http://YOUR-IP:8000/api
-```
-
-Important: your Mac and Android device must be on the same Wi-Fi network.
-
-### Testing on a physical Android device (Windows)
-
-1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
-2. Enable USB Debugging in Developer Options
-3. Connect via USB
-4. Find your Windows IP address — run this in Command Prompt:
-```
-ipconfig
-```
-Look for **IPv4-adres** under your Wi-Fi adapter, e.g. `192.168.1.42`
-
-5. Start Laravel so it listens on all interfaces:
-```bash
-php artisan serve --host=0.0.0.0
-```
-6. Run:
-```bash
-flutter run --dart-define=API_URL=http://YOUR-IP:8000/api
-```
-
-Important: your PC and Android device must be on the same Wi-Fi network.
-
-### Common issues
-
-| Problem | Solution |
-|---|---|
-| `command not found: flutter` | Flutter not in PATH, check installation |
-| App shows "Could not connect to API" | Make sure Laravel is running with `php artisan serve` |
-| App shows "Upload duurde te lang" | Check your network connection and if Laravel is running |
-| App shows "Inloggen duurde te lang" | Your device can't reach the server — use your PC's IP address instead of localhost, and start Laravel with `php artisan serve --host=0.0.0.0` |
-| iOS app crashes when switching apps | Normal iOS behavior, app restarts automatically |
-| iOS app crashes when changing permissions | Normal iOS behavior, app restarts automatically |
-| Android permission loop | Wipe app data in emulator settings and restart |
-| Red screen with errors after pull | Run `flutter pub get` |
-| Camera preview looks stretched | Make sure `lockCaptureOrientation` is in `_initCamera` |
-| Uploaded photos are rotated | `PhotoService.fixOrientation` handles this automatically |
-| `flutter run` asks to choose between macOS/Chrome | Start an Android emulator first, or use `open -a Simulator` for iOS |
-
-## Running Tests
+## Tests
 
 ```bash
 flutter test
 ```
 
-This runs all widget and unit tests in the `test/` folder. Tests must pass before merging a PR.
-
 ## Useful Commands
 
 | Command | Description |
 |---|---|
-| `flutter pub get` | Install dependencies (run after every pull) |
-| `flutter pub add <package>` | Add a new package |
-| `flutter clean` | Clear build files (fixes weird build issues) |
+| `flutter pub get` | Install dependencies |
+| `flutter clean` | Clear build files |
 | `flutter devices` | Show available devices |
-| `flutter test` | Run all tests |
-| `flutter analyze` | Run linter checks |
-| `flutter run` | Run the app in debug mode |
-| `flutter run --release` | Run the app in release mode |
-| `flutter build ios --release` | Build iOS release (for physical iPhone) |
+| `flutter analyze` | Run linter |
+| `flutter run --release` | Run in release mode |
 | `flutter build apk --release` | Build Android APK |
-
-## Code Conventions
-
-See `Code_Conventions.docx` for the full naming and style rules. Here are the Flutter-specific rules:
-
-- **Files:** snake_case (`camera_screen.dart`)
-- **Classes:** PascalCase (`CameraScreen`)
-- **Variables and methods:** camelCase (`_initCamera`, `_isReady`)
-- **Private members:** underscore prefix (`_controller`)
-- **Colors:** always use `AppColors`, never hardcoded hex values
-- **Text styles:** always use `AppTextStyles`, never inline styles for heading/body
-- **Icons:** use `lucide_icons` package, not Material Icons
-- **Fonts:** use `google_fonts` package (Syne for headings, Nunito for body)
-- **Buttons:** square corners (configured globally in `AppTheme`)
-- **New screens:** go in `lib/screens/`
-- **Reusable UI:** go in `lib/widgets/`
-- **Business logic:** go in `lib/services/`, not in screens
-- **Use `const`** wherever possible
-- **No commented-out code** in commits
-- **Commit messages** in English
