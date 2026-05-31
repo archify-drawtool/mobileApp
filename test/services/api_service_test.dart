@@ -155,11 +155,15 @@ void main() {
         final tempFile = File('${Directory.systemTemp.path}/test_photo.jpg');
         tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
 
-        late http.BaseRequest capturedRequest;
-        final client = MockClient((request) async {
-          capturedRequest = request;
-          return http.Response(
-            jsonEncode({'message': 'Photo uploaded successfully'}),
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(
+              utf8.encode(
+                jsonEncode({'message': 'Photo uploaded successfully'}),
+              ),
+            ),
             201,
           );
         });
@@ -174,6 +178,34 @@ void main() {
         expect(result['message'], 'Photo uploaded successfully');
         expect(capturedRequest.url.path, endsWith('/photos/upload'));
         expect(capturedRequest.headers['Accept'], 'application/json');
+        expect(capturedRequest.fields['project_id'], '42');
+
+        tempFile.deleteSync();
+      });
+
+      test('should omit project_id when uploading to my sketches', () async {
+        final tempFile = File('${Directory.systemTemp.path}/test_photo.jpg');
+        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(
+              utf8.encode(
+                jsonEncode({'message': 'Photo uploaded successfully'}),
+              ),
+            ),
+            201,
+          );
+        });
+
+        final apiService = ApiService(client: client);
+        final result = await apiService.uploadPhoto(tempFile.path);
+
+        expect(result['success'], true);
+        expect(capturedRequest.url.path, endsWith('/photos/upload'));
+        expect(capturedRequest.fields.containsKey('project_id'), false);
 
         tempFile.deleteSync();
       });

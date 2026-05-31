@@ -63,14 +63,12 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   }
 
   Future<void> _onUpload() async {
-    if (_selectedProject == null) return;
-
     setState(() => _isUploading = true);
 
     final fixedPath = await _photoService.fixOrientation(widget.photoPath);
     final result = await _apiService.uploadPhoto(
       fixedPath,
-      projectId: _selectedProject!.id,
+      projectId: _selectedProject?.id,
     );
 
     await _photoService.cleanupFixedPhoto(fixedPath);
@@ -89,7 +87,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
         MaterialPageRoute(
           builder: (_) => UploadStatusScreen(
             photoId: result['photo_id'] as int,
-            projectId: _selectedProject!.id,
+            projectId: _selectedProject?.id,
           ),
         ),
       );
@@ -116,7 +114,10 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
       body: Column(
         children: [
           const SizedBox(height: 4),
-          const Text('Selecteer een project', style: AppTextStyles.body),
+          const Text(
+            'Waar wil je deze schets opslaan?',
+            style: AppTextStyles.body,
+          ),
           const SizedBox(height: 16),
           Expanded(child: _buildBody()),
           const SizedBox(height: 24),
@@ -125,9 +126,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _selectedProject != null && !_isUploading
-                    ? _onUpload
-                    : null,
+                onPressed: _isUploading ? null : _onUpload,
                 icon: _isUploading
                     ? const SizedBox(
                         width: 18,
@@ -143,7 +142,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
                       ? 'Uploaden...'
                       : _selectedProject != null
                       ? 'Uploaden naar "${_selectedProject!.title}"'
-                      : 'Selecteer een project',
+                      : 'Uploaden naar Mijn Schetsen',
                 ),
               ),
             ),
@@ -197,7 +196,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
               Icon(LucideIcons.folderOpen, color: AppColors.grey, size: 48),
               SizedBox(height: 16),
               Text(
-                'Je hebt nog geen projecten.\nMaak eerst een project aan in de webapp.',
+                'Je hebt nog geen projecten.\nDeze foto wordt opgeslagen in Mijn Schetsen.',
                 textAlign: TextAlign.center,
                 style: AppTextStyles.body,
               ),
@@ -207,53 +206,74 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
       );
     }
 
-    return ListView.separated(
+    return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      itemCount: _projects.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final project = _projects[index];
-        final isSelected = _selectedProject?.id == project.id;
+      children: [
+        _buildDestinationTile(
+          title: 'Mijn Schetsen',
+          icon: LucideIcons.folder,
+          isSelected: _selectedProject == null,
+          onTap: () => setState(() => _selectedProject = null),
+        ),
+        const SizedBox(height: 16),
+        const Text('Projecten', style: AppTextStyles.body),
+        const SizedBox(height: 8),
+        ..._projects.map((project) {
+          final isSelected = _selectedProject?.id == project.id;
 
-        return GestureDetector(
-          onTap: _isUploading
-              ? null
-              : () => setState(() => _selectedProject = project),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: isSelected ? AppColors.magenta : AppColors.grey,
-                width: isSelected ? 2 : 1,
-              ),
-              borderRadius: BorderRadius.circular(8),
-              color: isSelected ? AppColors.magentaLight : Colors.transparent,
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: _buildDestinationTile(
+              title: project.title,
+              icon: LucideIcons.folderOpen,
+              isSelected: isSelected,
+              onTap: () => setState(() => _selectedProject = project),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  isSelected ? LucideIcons.checkCircle2 : LucideIcons.circle,
-                  color: isSelected ? AppColors.magenta : AppColors.grey,
-                  size: 22,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    project.title,
-                    style: TextStyle(
-                      color: isSelected ? AppColors.white : AppColors.grey,
-                      fontSize: 16,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildDestinationTile({
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: _isUploading ? null : onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? AppColors.magenta : AppColors.grey,
+            width: isSelected ? 2 : 1,
           ),
-        );
-      },
+          borderRadius: BorderRadius.circular(8),
+          color: isSelected ? AppColors.magentaLight : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? LucideIcons.checkCircle2 : icon,
+              color: isSelected ? AppColors.magenta : AppColors.grey,
+              size: 22,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isSelected ? AppColors.white : AppColors.grey,
+                  fontSize: 16,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

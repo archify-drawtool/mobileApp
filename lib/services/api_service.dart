@@ -169,7 +169,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> uploadPhoto(
     String photoPath, {
-    required int projectId,
+    int? projectId,
   }) async {
     final file = File(photoPath);
     if (!await file.exists()) {
@@ -184,7 +184,9 @@ class ApiService {
       );
 
       request.headers.addAll(await _authHeaders());
-      request.fields['project_id'] = projectId.toString();
+      if (projectId != null) {
+        request.fields['project_id'] = projectId.toString();
+      }
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       streamedResponse = await _client

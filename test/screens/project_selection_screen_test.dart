@@ -12,9 +12,9 @@ void main() {
       );
     }
 
-    testWidgets('should display selection text', (tester) async {
+    testWidgets('should display destination text', (tester) async {
       await tester.pumpWidget(createScreen());
-      expect(find.text('Selecteer een project'), findsWidgets);
+      expect(find.text('Waar wil je deze schets opslaan?'), findsWidgets);
     });
 
     testWidgets('should have PROJECT badge', (tester) async {
@@ -22,14 +22,13 @@ void main() {
       expect(find.text('PROJECT'), findsOneWidget);
     });
 
-    testWidgets('should have a disabled upload button initially', (
-      tester,
-    ) async {
+    testWidgets('should upload to my sketches initially', (tester) async {
       await tester.pumpWidget(createScreen());
       await tester.pump();
 
       final button = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
-      expect(button.onPressed, isNull);
+      expect(button.onPressed, isNotNull);
+      expect(find.text('Uploaden naar Mijn Schetsen'), findsOneWidget);
     });
 
     testWidgets('should show loading indicator initially', (tester) async {
