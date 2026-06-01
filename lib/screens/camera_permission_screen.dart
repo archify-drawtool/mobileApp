@@ -6,14 +6,17 @@ import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 
 class CameraPermissionScreen extends StatefulWidget {
-  const CameraPermissionScreen({super.key});
+  const CameraPermissionScreen({super.key, FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
+
+  final FlutterSecureStorage _storage;
 
   @override
   State<CameraPermissionScreen> createState() => _CameraPermissionScreenState();
 }
 
 class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
-  static const _storage = FlutterSecureStorage();
+  FlutterSecureStorage get _storage => widget._storage;
   static const _seenKey = 'hasSeenPermissionScreen';
 
   bool _checking = true;
