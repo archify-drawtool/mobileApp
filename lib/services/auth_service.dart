@@ -73,7 +73,7 @@ class AuthService {
       (_) async {
         final idToken = await oauth.getIdToken();
         if (idToken == null) {
-          throw AuthException('Geen id_token ontvangen van Microsoft.');
+          throw const AuthException('Geen id_token ontvangen van Microsoft.');
         }
         return _exchangeToken(idToken);
       },
@@ -94,17 +94,17 @@ class AuthService {
           )
           .timeout(const Duration(seconds: 15));
     } on SocketException {
-      throw AuthException(
+      throw const AuthException(
         'Server is niet bereikbaar. Controleer je internetverbinding.',
       );
     } on TimeoutException {
-      throw AuthException('Inloggen duurde te lang. Probeer het opnieuw.');
+      throw const AuthException('Inloggen duurde te lang. Probeer het opnieuw.');
     }
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final token = data['token'] as String?;
-      if (token == null) throw AuthException('API gaf geen token terug.');
+      if (token == null) throw const AuthException('API gaf geen token terug.');
       await saveToken(token);
       return token;
     }
