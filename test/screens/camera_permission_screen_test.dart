@@ -7,8 +7,7 @@ import 'package:archify_app/theme/app_theme.dart';
 class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
   final Map<String, String> _store;
 
-  _FakeSecureStorage({Map<String, String>? initial})
-    : _store = initial ?? {};
+  _FakeSecureStorage({Map<String, String>? initial}) : _store = initial ?? {};
 
   @override
   Future<String?> read({
