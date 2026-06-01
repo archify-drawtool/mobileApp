@@ -98,7 +98,9 @@ class AuthService {
         'Server is niet bereikbaar. Controleer je internetverbinding.',
       );
     } on TimeoutException {
-      throw const AuthException('Inloggen duurde te lang. Probeer het opnieuw.');
+      throw const AuthException(
+        'Inloggen duurde te lang. Probeer het opnieuw.',
+      );
     }
 
     if (response.statusCode == 200) {
