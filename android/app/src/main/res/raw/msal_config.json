@@ -6,8 +6,8 @@
     {
       "type": "AAD",
       "audience": {
-        "type": "AzureADMyOrg",
-        "tenant_id": "4d99c292-006b-414b-b70c-cbc11cd205ee"
+        "type": "AzureADandPersonalMicrosoftAccount",
+        "tenant_id": "common"
       }
     }
   ]
