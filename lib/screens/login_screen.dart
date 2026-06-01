@@ -7,7 +7,7 @@ import 'package:lucide_flutter/lucide_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, AuthService? authService})
-      : _authService = authService;
+    : _authService = authService;
 
   final AuthService? _authService;
 

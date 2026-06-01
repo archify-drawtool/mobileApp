@@ -64,8 +64,7 @@ class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
     WebOptions? webOptions,
     MacOsOptions? mOptions,
     WindowsOptions? wOptions,
-  }) async =>
-      _store[key];
+  }) async => _store[key];
 
   @override
   Future<void> delete({
@@ -87,9 +86,7 @@ Future<void> _pumpLogin(
   WidgetTester tester, {
   required AuthService auth,
 }) async {
-  await tester.pumpWidget(
-    MaterialApp(home: LoginScreen(authService: auth)),
-  );
+  await tester.pumpWidget(MaterialApp(home: LoginScreen(authService: auth)));
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -97,10 +94,7 @@ Future<void> _pumpLogin(
 void main() {
   group('LoginScreen', () {
     testWidgets('renders title and Microsoft login button', (tester) async {
-      await _pumpLogin(
-        tester,
-        auth: _FakeAuthService(outcome: null),
-      );
+      await _pumpLogin(tester, auth: _FakeAuthService(outcome: null));
 
       expect(find.text('Login op Archify'), findsOneWidget);
       expect(find.byKey(const Key('login-microsoft')), findsOneWidget);
@@ -109,8 +103,9 @@ void main() {
       expect(find.byKey(const Key('login-password')), findsNothing);
     });
 
-    testWidgets('shows no error when user cancels Microsoft login',
-        (tester) async {
+    testWidgets('shows no error when user cancels Microsoft login', (
+      tester,
+    ) async {
       final auth = _FakeAuthService(outcome: null); // null = geannuleerd
 
       await _pumpLogin(tester, auth: auth);

@@ -332,6 +332,5 @@ void main() {
         expect(result['message'], isNotEmpty);
       });
     });
-
   });
 }

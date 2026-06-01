@@ -5,7 +5,6 @@ import 'package:archify_app/theme/app_theme.dart';
 
 void main() {
   group('CameraPermissionScreen', () {
-
     Widget createScreen() {
       return MaterialApp(
         theme: AppTheme.theme,

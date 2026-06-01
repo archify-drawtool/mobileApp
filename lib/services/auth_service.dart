@@ -24,7 +24,7 @@ class AuthService {
   final FlutterSecureStorage _storage;
 
   AuthService({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static AadOAuth _buildOAuth() {
     final config = Config(
@@ -95,7 +95,8 @@ class AuthService {
           .timeout(const Duration(seconds: 15));
     } on SocketException {
       throw AuthException(
-          'Server is niet bereikbaar. Controleer je internetverbinding.');
+        'Server is niet bereikbaar. Controleer je internetverbinding.',
+      );
     } on TimeoutException {
       throw AuthException('Inloggen duurde te lang. Probeer het opnieuw.');
     }
@@ -111,7 +112,8 @@ class AuthService {
     String message;
     try {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      message = data['message'] as String? ??
+      message =
+          data['message'] as String? ??
           'Inloggen mislukt (${response.statusCode}).';
     } catch (_) {
       message = 'Inloggen mislukt (${response.statusCode}).';
