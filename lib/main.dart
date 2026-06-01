@@ -5,6 +5,8 @@ import 'package:archify_app/screens/login_screen.dart';
 import 'package:archify_app/services/auth_service.dart';
 import 'package:archify_app/theme/app_theme.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
@@ -22,6 +24,7 @@ class ArchifyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Archify',
       theme: AppTheme.theme,
+      navigatorKey: navigatorKey,
       home: const AuthGate(),
     );
   }
@@ -31,7 +34,7 @@ class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
   static Future<void> logoutAndRedirect(BuildContext context) async {
-    await AuthService().clearToken();
+    await AuthService().logout();
     if (!context.mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -55,7 +58,12 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _check() async {
-    final loggedIn = await _auth.isLoggedIn();
+    bool loggedIn = false;
+    try {
+      loggedIn = await _auth.isLoggedIn();
+    } catch (_) {
+      // Keychain niet bereikbaar (bijv. eerste boot zonder entitlement) — behandel als uitgelogd
+    }
     if (!mounted) return;
     setState(() {
       _loggedIn = loggedIn;

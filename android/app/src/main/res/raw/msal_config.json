@@ -1,0 +1,14 @@
+{
+  "client_id": "11b7be58-c5cf-4696-a6b1-92a3a01e5b7f",
+  "authorization_user_agent": "DEFAULT",
+  "redirect_uri": "msauth://com.example.archify_app/2jmj7l5rSw0yVb/vlWAYkK/YBwk=",
+  "authorities": [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADMyOrg",
+        "tenant_id": "4d99c292-006b-414b-b70c-cbc11cd205ee"
+      }
+    }
+  ]
+}

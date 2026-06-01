@@ -1,157 +1,152 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:archify_app/screens/login_screen.dart';
-import 'package:archify_app/services/api_service.dart';
 import 'package:archify_app/services/auth_service.dart';
 
-class _FakeApiService extends ApiService {
-  _FakeApiService({required this.result});
+// ── Fake AuthService voor widget-tests ───────────────────────────────────────
 
-  final LoginResult result;
+class _FakeAuthService extends AuthService {
+  _FakeAuthService({required this.outcome});
+
+  /// null = geannuleerd, String = token, AuthException = fout
+  final Object? outcome;
+
   int calls = 0;
-  String? lastEmail;
-  String? lastPassword;
 
   @override
-  Future<LoginResult> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<String?> loginWithMicrosoft() async {
     calls++;
-    lastEmail = email;
-    lastPassword = password;
-    return result;
+    if (outcome is AuthException) throw outcome!;
+    return outcome as String?;
+  }
+
+  @override
+  Future<void> saveToken(String token) async {}
+
+  @override
+  Future<String?> getToken() async => null;
+
+  @override
+  Future<bool> isLoggedIn() async => false;
+}
+
+// ── Fake FlutterSecureStorage voor unit-tests ─────────────────────────────────
+
+class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
+  final Map<String, String> _store = {};
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    if (value == null) {
+      _store.remove(key);
+    } else {
+      _store[key] = value;
+    }
+  }
+
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async =>
+      _store[key];
+
+  @override
+  Future<void> delete({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {
+    _store.remove(key);
   }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 Future<void> _pumpLogin(
   WidgetTester tester, {
-  required ApiService api,
   required AuthService auth,
 }) async {
   await tester.pumpWidget(
-    MaterialApp(
-      home: LoginScreen(apiService: api, authService: auth),
-    ),
+    MaterialApp(home: LoginScreen(authService: auth)),
   );
 }
 
-void main() {
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-  });
+// ── Tests ─────────────────────────────────────────────────────────────────────
 
+void main() {
   group('LoginScreen', () {
-    testWidgets('renders email, password field and login button', (
-      tester,
-    ) async {
+    testWidgets('renders title and Microsoft login button', (tester) async {
       await _pumpLogin(
         tester,
-        api: _FakeApiService(
-          result: const LoginResult(success: true, token: 't'),
-        ),
-        auth: AuthService(),
+        auth: _FakeAuthService(outcome: null),
       );
 
       expect(find.text('Login op Archify'), findsOneWidget);
-      expect(find.byKey(const Key('login-email')), findsOneWidget);
-      expect(find.byKey(const Key('login-password')), findsOneWidget);
-      expect(find.byKey(const Key('login-submit')), findsOneWidget);
+      expect(find.byKey(const Key('login-microsoft')), findsOneWidget);
+      // Oude velden mogen er niet meer zijn
+      expect(find.byKey(const Key('login-email')), findsNothing);
+      expect(find.byKey(const Key('login-password')), findsNothing);
     });
 
-    testWidgets('shows validation error when email is invalid', (tester) async {
-      final api = _FakeApiService(
-        result: const LoginResult(success: true, token: 't'),
-      );
+    testWidgets('shows no error when user cancels Microsoft login',
+        (tester) async {
+      final auth = _FakeAuthService(outcome: null); // null = geannuleerd
 
-      await _pumpLogin(tester, api: api, auth: AuthService());
-
-      await tester.enterText(
-        find.byKey(const Key('login-email')),
-        'not-an-email',
-      );
-      await tester.enterText(find.byKey(const Key('login-password')), 'secret');
-      await tester.tap(find.byKey(const Key('login-submit')));
-      await tester.pump();
-
-      expect(find.text('Vul een geldig e-mailadres in.'), findsOneWidget);
-      expect(api.calls, 0);
-    });
-
-    testWidgets('shows validation error when password is empty', (
-      tester,
-    ) async {
-      final api = _FakeApiService(
-        result: const LoginResult(success: true, token: 't'),
-      );
-
-      await _pumpLogin(tester, api: api, auth: AuthService());
-
-      await tester.enterText(
-        find.byKey(const Key('login-email')),
-        'john@example.com',
-      );
-      await tester.tap(find.byKey(const Key('login-submit')));
-      await tester.pump();
-
-      expect(find.text('Wachtwoord is verplicht.'), findsOneWidget);
-      expect(api.calls, 0);
-    });
-
-    testWidgets('shows server error on failed login', (tester) async {
-      final api = _FakeApiService(
-        result: const LoginResult(
-          success: false,
-          message: 'De opgegeven credentials zijn onjuist.',
-        ),
-      );
-
-      await _pumpLogin(tester, api: api, auth: AuthService());
-
-      await tester.enterText(
-        find.byKey(const Key('login-email')),
-        'john@example.com',
-      );
-      await tester.enterText(find.byKey(const Key('login-password')), 'wrong');
-      await tester.tap(find.byKey(const Key('login-submit')));
-      await tester.pump(); // start async
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(api.calls, 1);
-      expect(
-        find.text('De opgegeven credentials zijn onjuist.'),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('saves token on successful login', (tester) async {
-      final api = _FakeApiService(
-        result: const LoginResult(success: true, token: 'abc123'),
-      );
-      final auth = AuthService();
-
-      await _pumpLogin(tester, api: api, auth: auth);
-
-      await tester.enterText(
-        find.byKey(const Key('login-email')),
-        'john@example.com',
-      );
-      await tester.enterText(find.byKey(const Key('login-password')), 'secret');
-      await tester.tap(find.byKey(const Key('login-submit')));
+      await _pumpLogin(tester, auth: auth);
+      await tester.tap(find.byKey(const Key('login-microsoft')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
 
-      expect(await auth.getToken(), 'abc123');
-      expect(api.lastEmail, 'john@example.com');
-      expect(api.lastPassword, 'secret');
+      expect(auth.calls, 1);
+      expect(find.byKey(const Key('login-error')), findsNothing);
+    });
+
+    testWidgets('shows error message on AuthException', (tester) async {
+      final auth = _FakeAuthService(
+        outcome: const AuthException('Account niet gevonden.'),
+      );
+
+      await _pumpLogin(tester, auth: auth);
+      await tester.tap(find.byKey(const Key('login-microsoft')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byKey(const Key('login-error')), findsOneWidget);
+      expect(find.text('Account niet gevonden.'), findsOneWidget);
     });
   });
 
-  group('AuthService', () {
+  group('AuthService (token opslag)', () {
+    late _FakeSecureStorage fakeStorage;
+    late AuthService auth;
+
+    setUp(() {
+      fakeStorage = _FakeSecureStorage();
+      auth = AuthService(storage: fakeStorage);
+    });
+
     test('saveToken + getToken roundtrip', () async {
-      final auth = AuthService();
       expect(await auth.isLoggedIn(), false);
       await auth.saveToken('xyz');
       expect(await auth.getToken(), 'xyz');
