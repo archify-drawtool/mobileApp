@@ -8,7 +8,10 @@ class PhotoService {
   /// [quarterTurns] is the number of 90° clockwise rotations the user picked in
   /// the preview (0–3). The rotation is baked into the pixels so the uploaded
   /// file is already upright — no orientation metadata is sent to the backend.
-  Future<String> fixOrientation(String photoPath, {int quarterTurns = 0}) async {
+  Future<String> fixOrientation(
+    String photoPath, {
+    int quarterTurns = 0,
+  }) async {
     final file = File(photoPath);
     final bytes = await file.readAsBytes();
     final image = img.decodeImage(bytes);
