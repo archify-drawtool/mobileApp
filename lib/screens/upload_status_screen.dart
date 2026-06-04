@@ -12,13 +12,9 @@ import 'package:archify_app/widgets/status_block.dart';
 
 class UploadStatusScreen extends StatefulWidget {
   final int photoId;
-  final int projectId;
+  final int? projectId;
 
-  const UploadStatusScreen({
-    super.key,
-    required this.photoId,
-    required this.projectId,
-  });
+  const UploadStatusScreen({super.key, required this.photoId, this.projectId});
 
   @override
   State<UploadStatusScreen> createState() => _UploadStatusScreenState();

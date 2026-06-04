@@ -4,12 +4,13 @@ import 'package:archify_app/services/api_service.dart';
 
 class ShareService {
   Future<void> shareSketch({
-    required int projectId,
+    int? projectId,
     required int sketchId,
     required Rect shareOrigin,
   }) async {
-    final shareUrl =
-        '${ApiService.webAppUrl}/projecten/$projectId/schetsen/$sketchId';
+    final shareUrl = projectId == null
+        ? '${ApiService.webAppUrl}/schetsen/$sketchId'
+        : '${ApiService.webAppUrl}/projecten/$projectId/schetsen/$sketchId';
 
     await SharePlus.instance.share(
       ShareParams(
