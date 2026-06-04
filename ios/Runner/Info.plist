@@ -74,6 +74,8 @@
   <array>
     <string>mailto</string>
   </array>
+  <key>NSLocalNetworkUsageDescription</key>
+  <string>Archify maakt verbinding met de lokale ontwikkelserver tijdens het testen.</string>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSAllowsArbitraryLoads</key>

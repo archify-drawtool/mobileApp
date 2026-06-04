@@ -116,7 +116,11 @@ open ios/Runner.xcworkspace
 ```
 Set scheme to **Release**, select your iPhone, **Product → Run**.
 
-3. **Android:**
+If the app cannot reach the server on a physical iPhone:
+- Open `http://YOUR-IP:8000/api/health` in Safari on the iPhone. It should show `{"status":"ok"}`.
+- Check **Settings → Archify App → Local Network** and enable it. If the toggle is missing or stuck, delete the app from the iPhone and reinstall so iOS asks for local-network access again.
+
+4. **Android:**
    1. Enable Developer Mode on your phone (Settings → About Phone → tap Build Number 7 times)
    2. Enable USB Debugging in Developer Options
    3. Connect via USB and accept the debugging prompt on your phone
