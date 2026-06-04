@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:archify_app/screens/camera_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 
 class CameraPermissionScreen extends StatefulWidget {
-  const CameraPermissionScreen({super.key});
+  const CameraPermissionScreen({super.key, FlutterSecureStorage? storage})
+    : _storage = storage ?? const FlutterSecureStorage();
+
+  final FlutterSecureStorage _storage;
 
   @override
   State<CameraPermissionScreen> createState() => _CameraPermissionScreenState();
 }
 
 class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
+  FlutterSecureStorage get _storage => widget._storage;
+  static const _seenKey = 'hasSeenPermissionScreen';
+
   bool _checking = true;
 
   @override
@@ -22,9 +28,8 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
   }
 
   Future<void> _checkFirstLaunch() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenPermissionScreen =
-        prefs.getBool('hasSeenPermissionScreen') ?? false;
+    final value = await _storage.read(key: _seenKey);
+    final hasSeenPermissionScreen = value == 'true';
 
     if (hasSeenPermissionScreen && mounted) {
       Navigator.pushReplacement(
@@ -40,8 +45,7 @@ class _CameraPermissionScreenState extends State<CameraPermissionScreen> {
   }
 
   Future<void> _onAllowAccess() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenPermissionScreen', true);
+    await _storage.write(key: _seenKey, value: 'true');
 
     if (mounted) {
       Navigator.pushReplacement(

@@ -2,7 +2,7 @@ import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/photo_preview_box.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/screens/project_selection_screen.dart';
 
