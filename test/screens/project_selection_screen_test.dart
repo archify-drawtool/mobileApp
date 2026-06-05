@@ -8,7 +8,7 @@ void main() {
     Widget createScreen() {
       return MaterialApp(
         theme: AppTheme.theme,
-        home: const ProjectSelectionScreen(photoPath: '/fake/path.jpg'),
+        home: const ProjectSelectionScreen(previewId: 1),
       );
     }
 

@@ -5,7 +5,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
-import 'package:archify_app/screens/photo_preview_screen.dart';
+import 'package:archify_app/screens/photo_review_screen.dart';
 import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/camera_preview_box.dart';
@@ -121,7 +121,7 @@ class _CameraScreenState extends State<CameraScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhotoPreviewScreen(photoPath: photo.path),
+          builder: (context) => PhotoReviewScreen(photoPath: photo.path),
         ),
       );
     }
@@ -133,7 +133,7 @@ class _CameraScreenState extends State<CameraScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => PhotoPreviewScreen(photoPath: photo.path),
+          builder: (context) => PhotoReviewScreen(photoPath: photo.path),
         ),
       );
     }
