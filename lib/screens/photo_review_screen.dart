@@ -276,6 +276,7 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
     return PhotoPreviewBox(
       photoPath: _fixedPhotoPath ?? widget.photoPath,
       quarterTurns: _quarterTurns,
+      animateRotation: !_orientationConfirmed,
     );
   }
 
