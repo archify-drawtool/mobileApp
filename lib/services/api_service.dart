@@ -407,17 +407,13 @@ class ApiService {
   Future<Map<String, dynamic>> commitPhotoPreview(
     int previewId, {
     int? projectId,
-    int rotation = 0,
   }) async {
     try {
       final response = await _client
           .post(
             Uri.parse('$baseUrl/photos/preview/$previewId/commit'),
             headers: await _authHeaders(json: true),
-            body: jsonEncode({
-              'project_id': ?projectId,
-              'rotation': rotation,
-            }),
+            body: jsonEncode({'project_id': ?projectId}),
           )
           .timeout(const Duration(seconds: 30));
 

@@ -16,26 +16,21 @@ class PhotoPreviewBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final turns = ((quarterTurns % 4) + 4) % 4;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.magenta, width: 2),
-        ),
-        child: ClipRect(
-          child: AspectRatio(
-            aspectRatio: 3 / 4,
-            // RotatedBox rotates within layout, so the child is fit *after*
-            // rotation. Combined with BoxFit.contain the whole photo stays
-            // visible (letterboxed) instead of being cropped — also when the
-            // user turns it to landscape.
-            child: RotatedBox(
-              quarterTurns: quarterTurns,
-              child: Image.file(
-                File(photoPath),
-                fit: BoxFit.contain,
-                width: double.infinity,
-                height: double.infinity,
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.magenta, width: 2),
+            ),
+            child: ClipRect(
+              child: RotatedBox(
+                quarterTurns: turns,
+                child: Image.file(File(photoPath)),
               ),
             ),
           ),
