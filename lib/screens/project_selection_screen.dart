@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
