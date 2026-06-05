@@ -27,21 +27,25 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
   final _photoService = PhotoService();
 
   String? _fixedPhotoPath;
+  int _quarterTurns = 0;
   int? _previewId;
   int? _nodesCount;
   int? _edgesCount;
-  bool _isUploading = true;
+  bool _orientationConfirmed = false;
+  bool _isUploading = false;
   bool _isDetecting = false;
   String? _uploadError;
 
   Timer? _pollTimer;
   DateTime? _pollStart;
 
-  @override
-  void initState() {
-    super.initState();
-    _startPreviewUpload();
-  }
+  bool get _canUsePhoto =>
+      _previewId != null &&
+      !_isUploading &&
+      !_isDetecting &&
+      _uploadError == null &&
+      _nodesCount != null &&
+      _edgesCount != null;
 
   @override
   void dispose() {
@@ -52,12 +56,42 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
     super.dispose();
   }
 
-  Future<void> _startPreviewUpload() async {
-    String fixedPath;
+  void _rotateClockwise() {
+    if (_orientationConfirmed) return;
+    setState(() => _quarterTurns = (_quarterTurns + 1) % 4);
+  }
+
+  void _rotateCounterClockwise() {
+    if (_orientationConfirmed) return;
+    setState(() => _quarterTurns = (_quarterTurns + 3) % 4);
+  }
+
+  Future<void> _onContinue() async {
+    if (_orientationConfirmed || _isUploading) return;
+
+    setState(() {
+      _orientationConfirmed = true;
+      _isUploading = true;
+      _isDetecting = false;
+      _uploadError = null;
+      _previewId = null;
+      _nodesCount = null;
+      _edgesCount = null;
+    });
+
+    final String fixedPath;
     try {
-      fixedPath = await _photoService.fixOrientation(widget.photoPath);
+      fixedPath = await _photoService.fixOrientation(
+        widget.photoPath,
+        quarterTurns: _quarterTurns,
+      );
     } catch (_) {
-      fixedPath = widget.photoPath;
+      if (!mounted) return;
+      setState(() {
+        _isUploading = false;
+        _uploadError = 'Foto voorbereiden mislukt. Maak een nieuwe foto.';
+      });
+      return;
     }
 
     if (!mounted) {
@@ -67,9 +101,12 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
       return;
     }
 
-    setState(() => _fixedPhotoPath = fixedPath);
+    setState(() {
+      _fixedPhotoPath = fixedPath;
+      _quarterTurns = 0;
+    });
 
-    final result = await _apiService.uploadPhotoPreview(widget.photoPath);
+    final result = await _apiService.uploadPhotoPreview(fixedPath);
 
     if (!mounted) return;
 
@@ -78,7 +115,7 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
       return;
     }
 
-    if (result['success'] != true) {
+    if (result['success'] != true || result['preview_id'] is! int) {
       setState(() {
         _isUploading = false;
         _uploadError = result['message'] as String?;
@@ -88,21 +125,22 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
 
     final previewId = result['preview_id'] as int;
 
-    if (result['nodes_count'] != null && result['edges_count'] != null) {
+    if (result['nodes_count'] is int && result['edges_count'] is int) {
       setState(() {
         _previewId = previewId;
         _nodesCount = result['nodes_count'] as int;
         _edgesCount = result['edges_count'] as int;
         _isUploading = false;
       });
-    } else {
-      setState(() {
-        _previewId = previewId;
-        _isUploading = false;
-        _isDetecting = true;
-      });
-      _startPolling();
+      return;
     }
+
+    setState(() {
+      _previewId = previewId;
+      _isUploading = false;
+      _isDetecting = true;
+    });
+    _startPolling();
   }
 
   void _startPolling() {
@@ -111,11 +149,14 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
   }
 
   Future<void> _pollOnce() async {
-    if (_previewId == null || !mounted) return;
+    if (_previewId == null || !mounted || _pollStart == null) return;
 
     if (DateTime.now().difference(_pollStart!) >= _pollTimeout) {
       _pollTimer?.cancel();
-      setState(() => _isDetecting = false);
+      setState(() {
+        _isDetecting = false;
+        _uploadError = 'Detectie duurde te lang. Maak een nieuwe foto.';
+      });
       return;
     }
 
@@ -129,9 +170,18 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
       return;
     }
 
-    if (result['success'] == true &&
-        result['nodes_count'] != null &&
-        result['edges_count'] != null) {
+    if (result['success'] != true) return;
+
+    if (result['status'] == 'failed') {
+      _pollTimer?.cancel();
+      setState(() {
+        _isDetecting = false;
+        _uploadError = 'Detectie mislukt. Maak een nieuwe foto.';
+      });
+      return;
+    }
+
+    if (result['nodes_count'] is int && result['edges_count'] is int) {
       _pollTimer?.cancel();
       setState(() {
         _nodesCount = result['nodes_count'] as int;
@@ -142,7 +192,7 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
   }
 
   void _onUsePhoto() {
-    if (_previewId == null) return;
+    if (!_canUsePhoto) return;
     _pollTimer?.cancel();
     Navigator.push(
       context,
@@ -158,10 +208,39 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
 
   Future<void> _onNewPhoto() async {
     _pollTimer?.cancel();
-    if (_previewId != null) {
-      _apiService.deletePhotoPreview(_previewId!);
+    final previewId = _previewId;
+    if (previewId != null) {
+      await _apiService.deletePhotoPreview(previewId);
     }
     if (mounted) Navigator.pop(context);
+  }
+
+  Widget _rotateButton({
+    required String semanticLabel,
+    required String tooltip,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      onTap: onPressed,
+      child: ExcludeSemantics(
+        child: Tooltip(
+          message: tooltip,
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon, size: 18),
+            label: Text(label),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 48),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -170,12 +249,17 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
       appBar: AppBar(
         title: const ArchifyLogo(),
         automaticallyImplyLeading: false,
-        actions: const [ScreenBadge(label: 'REVIEW')],
+        actions: [
+          ScreenBadge(label: _orientationConfirmed ? 'REVIEW' : 'DRAAIEN'),
+        ],
       ),
       body: Column(
         children: [
           const SizedBox(height: 4),
-          const Text('Foto controleren', style: AppTextStyles.body),
+          Text(
+            _orientationConfirmed ? 'Foto controleren' : 'Zet de foto rechtop',
+            style: AppTextStyles.body,
+          ),
           const SizedBox(height: 16),
           Expanded(child: _buildPhotoArea()),
           const SizedBox(height: 16),
@@ -189,15 +273,36 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
   }
 
   Widget _buildPhotoArea() {
-    if (_fixedPhotoPath != null) {
-      return PhotoPreviewBox(photoPath: _fixedPhotoPath!);
-    }
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.magenta),
+    return PhotoPreviewBox(
+      photoPath: _fixedPhotoPath ?? widget.photoPath,
+      quarterTurns: _quarterTurns,
     );
   }
 
   Widget _buildDetectionStatus() {
+    if (!_orientationConfirmed) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _rotateButton(
+            semanticLabel: 'Foto 90 graden linksom draaien',
+            tooltip: 'Linksom draaien',
+            icon: LucideIcons.rotateCcw,
+            label: 'Linksom',
+            onPressed: _rotateCounterClockwise,
+          ),
+          const SizedBox(width: 16),
+          _rotateButton(
+            semanticLabel: 'Foto 90 graden rechtsom draaien',
+            tooltip: 'Rechtsom draaien',
+            icon: LucideIcons.rotateCw,
+            label: 'Rechtsom',
+            onPressed: _rotateClockwise,
+          ),
+        ],
+      );
+    }
+
     if (_isUploading) {
       return _buildStatusRow('Foto uploaden...');
     }
@@ -262,26 +367,53 @@ class _PhotoReviewScreenState extends State<PhotoReviewScreen> {
   Widget _buildButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _onNewPhoto,
-              icon: const Icon(LucideIcons.camera, size: 18),
-              label: const Text('Nieuwe foto'),
-            ),
+      child: _orientationConfirmed
+          ? _buildReviewButtons()
+          : _buildOrientationButtons(),
+    );
+  }
+
+  Widget _buildOrientationButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _onNewPhoto,
+            icon: const Icon(LucideIcons.camera, size: 18),
+            label: const Text('Nieuwe foto'),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed:
-                  _isUploading || _previewId == null ? null : _onUsePhoto,
-              icon: const Icon(LucideIcons.check, size: 18),
-              label: const Text('Gebruik deze foto'),
-            ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _onContinue,
+            icon: const Icon(LucideIcons.arrowRight, size: 18),
+            label: const Text('Verder'),
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReviewButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _onNewPhoto,
+            icon: const Icon(LucideIcons.camera, size: 18),
+            label: const Text('Nieuwe foto'),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: _canUsePhoto ? _onUsePhoto : null,
+            icon: const Icon(LucideIcons.check, size: 18),
+            label: const Text('Gebruik deze foto'),
+          ),
+        ),
+      ],
     );
   }
 }
