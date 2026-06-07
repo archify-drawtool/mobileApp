@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/screens/photo_preview_screen.dart';
 import 'package:archify_app/screens/camera_denied_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';

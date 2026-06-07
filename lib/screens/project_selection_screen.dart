@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
@@ -12,7 +12,14 @@ import 'package:archify_app/widgets/screen_badge.dart';
 class ProjectSelectionScreen extends StatefulWidget {
   final String photoPath;
 
-  const ProjectSelectionScreen({super.key, required this.photoPath});
+  /// Clockwise quarter turns picked in the preview, baked into the upload.
+  final int quarterTurns;
+
+  const ProjectSelectionScreen({
+    super.key,
+    required this.photoPath,
+    this.quarterTurns = 0,
+  });
 
   @override
   State<ProjectSelectionScreen> createState() => _ProjectSelectionScreenState();
@@ -65,7 +72,10 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   Future<void> _onUpload() async {
     setState(() => _isUploading = true);
 
-    final fixedPath = await _photoService.fixOrientation(widget.photoPath);
+    final fixedPath = await _photoService.fixOrientation(
+      widget.photoPath,
+      quarterTurns: widget.quarterTurns,
+    );
     final result = await _apiService.uploadPhoto(
       fixedPath,
       projectId: _selectedProject?.id,
