@@ -1,41 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:archify_app/screens/photo_preview_screen.dart';
+import 'package:archify_app/screens/photo_review_screen.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/photo_preview_box.dart';
 
 void main() {
-  group('PhotoPreviewScreen', () {
+  group('PhotoReviewScreen', () {
     Widget createScreen() {
       return MaterialApp(
         theme: AppTheme.theme,
-        home: const PhotoPreviewScreen(photoPath: '/fake/path.jpg'),
+        home: const PhotoReviewScreen(photoPath: '/fake/path.jpg'),
       );
     }
 
-    testWidgets('should display preview text', (tester) async {
+    testWidgets('should display orientation text first', (tester) async {
       await tester.pumpWidget(createScreen());
-      expect(find.text('Foto gebruiken?'), findsOneWidget);
+      expect(find.text('Zet de foto rechtop'), findsOneWidget);
     });
 
-    testWidgets('should have PREVIEW badge', (tester) async {
+    testWidgets('should have DRAAIEN badge before upload', (tester) async {
       await tester.pumpWidget(createScreen());
-      expect(find.text('PREVIEW'), findsOneWidget);
+      expect(find.text('DRAAIEN'), findsOneWidget);
     });
 
-    testWidgets('should have accept button with correct text', (tester) async {
+    testWidgets('should have rotate buttons', (tester) async {
       await tester.pumpWidget(createScreen());
-      expect(find.text('Accepteren'), findsOneWidget);
+      expect(find.text('Rechtsom'), findsOneWidget);
+      expect(find.text('Linksom'), findsOneWidget);
     });
 
-    testWidgets('should have retake button with correct text', (tester) async {
+    testWidgets('should have continue and new-photo buttons', (tester) async {
       await tester.pumpWidget(createScreen());
-      expect(find.text('Opnieuw'), findsOneWidget);
+      expect(find.text('Verder'), findsOneWidget);
+      expect(find.text('Nieuwe foto'), findsOneWidget);
     });
 
-    testWidgets('should have ArchifyLogo in app bar', (tester) async {
+    testWidgets('should not show use-photo button before preview upload', (
+      tester,
+    ) async {
       await tester.pumpWidget(createScreen());
-      expect(find.byType(RichText), findsWidgets);
+      expect(find.text('Gebruik deze foto'), findsNothing);
     });
 
     testWidgets('should not show back button', (tester) async {
@@ -43,31 +47,9 @@ void main() {
       expect(find.byType(BackButton), findsNothing);
     });
 
-    testWidgets('accept and retake buttons should be enabled', (tester) async {
+    testWidgets('should have ArchifyLogo in app bar', (tester) async {
       await tester.pumpWidget(createScreen());
-
-      final acceptButton = tester.widget<ElevatedButton>(
-        find.widgetWithText(ElevatedButton, 'Accepteren'),
-      );
-      final retakeButton = tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Opnieuw'),
-      );
-
-      expect(acceptButton.onPressed, isNotNull);
-      expect(retakeButton.onPressed, isNotNull);
-    });
-
-    testWidgets('should have an enabled rotate button', (tester) async {
-      await tester.pumpWidget(createScreen());
-
-      final rotateRight = tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Rechtsom'),
-      );
-      final rotateLeft = tester.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Linksom'),
-      );
-      expect(rotateRight.onPressed, isNotNull);
-      expect(rotateLeft.onPressed, isNotNull);
+      expect(find.byType(RichText), findsWidgets);
     });
 
     testWidgets('preview starts unrotated', (tester) async {
@@ -77,7 +59,7 @@ void main() {
       expect(box.quarterTurns, 0);
     });
 
-    testWidgets('tapping "Rechtsom" advances 90° clockwise each time', (
+    testWidgets('tapping "Rechtsom" advances 90 degrees clockwise each time', (
       tester,
     ) async {
       await tester.pumpWidget(createScreen());
@@ -94,7 +76,7 @@ void main() {
       expect(box().quarterTurns, 2);
     });
 
-    testWidgets('tapping "Linksom" goes counter-clockwise (0 -> 3)', (
+    testWidgets('tapping "Linksom" goes counter-clockwise from 0 to 3', (
       tester,
     ) async {
       await tester.pumpWidget(createScreen());
