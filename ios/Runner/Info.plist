@@ -85,6 +85,8 @@
     <string>msauthv2</string>
     <string>msauthv3</string>
   </array>
+  <key>NSLocalNetworkUsageDescription</key>
+  <string>Archify maakt verbinding met de lokale ontwikkelserver tijdens het testen.</string>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSAllowsArbitraryLoads</key>
