@@ -372,5 +372,56 @@ void main() {
         expect(result['message'], isNotEmpty);
       });
     });
+
+    group('uploadPhotoPreview', () {
+      test('should upload the already rotated preview image', () async {
+        final tempFile = File('${Directory.systemTemp.path}/test_preview.jpg');
+        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(utf8.encode(jsonEncode({'preview_id': 7}))),
+            201,
+          );
+        });
+
+        final apiService = ApiService(client: client, authService: _fakeAuth());
+        final result = await apiService.uploadPhotoPreview(tempFile.path);
+
+        expect(result['success'], true);
+        expect(result['preview_id'], 7);
+        expect(capturedRequest.url.path, endsWith('/photos/preview'));
+        expect(capturedRequest.fields.containsKey('rotation'), false);
+
+        tempFile.deleteSync();
+      });
+    });
+
+    group('commitPhotoPreview', () {
+      test('should send project_id without rotation', () async {
+        final client = MockClient((request) async {
+          expect(request.url.path, endsWith('/photos/preview/7/commit'));
+          expect(request.headers['Content-Type'], contains('application/json'));
+
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['project_id'], 42);
+          expect(body.containsKey('rotation'), false);
+
+          return http.Response(
+            jsonEncode({'photo_id': 9, 'sketch_id': 12}),
+            201,
+          );
+        });
+
+        final apiService = ApiService(client: client, authService: _fakeAuth());
+        final result = await apiService.commitPhotoPreview(7, projectId: 42);
+
+        expect(result['success'], true);
+        expect(result['photo_id'], 9);
+        expect(result['sketch_id'], 12);
+      });
+    });
   });
 }

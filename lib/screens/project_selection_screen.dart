@@ -4,21 +4,20 @@ import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
 import 'package:archify_app/screens/upload_status_screen.dart';
-import 'package:archify_app/services/photo_service.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 
 class ProjectSelectionScreen extends StatefulWidget {
-  final String photoPath;
-
-  /// Clockwise quarter turns picked in the preview, baked into the upload.
-  final int quarterTurns;
+  final int previewId;
+  final int? nodesCount;
+  final int? edgesCount;
 
   const ProjectSelectionScreen({
     super.key,
-    required this.photoPath,
-    this.quarterTurns = 0,
+    required this.previewId,
+    this.nodesCount,
+    this.edgesCount,
   });
 
   @override
@@ -27,7 +26,6 @@ class ProjectSelectionScreen extends StatefulWidget {
 
 class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   final ApiService _apiService = ApiService();
-  final PhotoService _photoService = PhotoService();
   List<Project> _projects = [];
   Project? _selectedProject;
   bool _isLoading = true;
@@ -72,16 +70,10 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   Future<void> _onUpload() async {
     setState(() => _isUploading = true);
 
-    final fixedPath = await _photoService.fixOrientation(
-      widget.photoPath,
-      quarterTurns: widget.quarterTurns,
-    );
-    final result = await _apiService.uploadPhoto(
-      fixedPath,
+    final result = await _apiService.commitPhotoPreview(
+      widget.previewId,
       projectId: _selectedProject?.id,
     );
-
-    await _photoService.cleanupFixedPhoto(fixedPath);
 
     if (!mounted) return;
 
@@ -105,7 +97,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Upload mislukt: ${result['message']}')),
+      SnackBar(content: Text('Opslaan mislukt: ${result['message']}')),
     );
   }
 
