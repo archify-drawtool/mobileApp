@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/main.dart';
 import 'package:archify_app/models/upload_stage.dart';
 import 'package:archify_app/services/api_service.dart';
@@ -12,13 +12,9 @@ import 'package:archify_app/widgets/status_block.dart';
 
 class UploadStatusScreen extends StatefulWidget {
   final int photoId;
-  final int projectId;
+  final int? projectId;
 
-  const UploadStatusScreen({
-    super.key,
-    required this.photoId,
-    required this.projectId,
-  });
+  const UploadStatusScreen({super.key, required this.photoId, this.projectId});
 
   @override
   State<UploadStatusScreen> createState() => _UploadStatusScreenState();

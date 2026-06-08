@@ -1,18 +1,53 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:archify_app/services/api_service.dart';
+import 'package:archify_app/services/auth_service.dart';
+
+class _FakeSecureStorage extends Fake implements FlutterSecureStorage {
+  @override
+  Future<String?> read({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async => null;
+
+  @override
+  Future<void> write({
+    required String key,
+    required String? value,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {}
+
+  @override
+  Future<void> delete({
+    required String key,
+    IOSOptions? iOptions,
+    AndroidOptions? aOptions,
+    LinuxOptions? lOptions,
+    WebOptions? webOptions,
+    MacOsOptions? mOptions,
+    WindowsOptions? wOptions,
+  }) async {}
+}
+
+AuthService _fakeAuth() => AuthService(storage: _FakeSecureStorage());
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-  });
 
   group('ApiService', () {
     test('baseUrl should have a default value', () {
@@ -84,7 +119,7 @@ void main() {
           );
         });
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.getProjects();
 
         expect(result['success'], true);
@@ -96,7 +131,7 @@ void main() {
           (_) async => http.Response(jsonEncode([]), 200),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.getProjects();
 
         expect(result['success'], true);
@@ -106,7 +141,7 @@ void main() {
       test('should return error on non-200 status', () async {
         final client = MockClient((_) async => http.Response('error', 500));
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.getProjects();
 
         expect(result['success'], false);
@@ -116,7 +151,7 @@ void main() {
       test('should handle SocketException', () async {
         final client = MockClient((_) => throw const SocketException(''));
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.getProjects();
 
         expect(result['success'], false);
@@ -126,7 +161,7 @@ void main() {
       test('should handle invalid JSON', () async {
         final client = MockClient((_) async => http.Response('not json', 200));
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.getProjects();
 
         expect(result['success'], false);
@@ -137,7 +172,7 @@ void main() {
     group('uploadPhoto', () {
       test('should return error when file does not exist', () async {
         final client = MockClient((_) async => http.Response('', 200));
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
 
         final result = await apiService.uploadPhoto(
           '/nonexistent/photo.jpg',
@@ -155,16 +190,20 @@ void main() {
         final tempFile = File('${Directory.systemTemp.path}/test_photo.jpg');
         tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
 
-        late http.BaseRequest capturedRequest;
-        final client = MockClient((request) async {
-          capturedRequest = request;
-          return http.Response(
-            jsonEncode({'message': 'Photo uploaded successfully'}),
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(
+              utf8.encode(
+                jsonEncode({'message': 'Photo uploaded successfully'}),
+              ),
+            ),
             201,
           );
         });
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 42,
@@ -174,6 +213,34 @@ void main() {
         expect(result['message'], 'Photo uploaded successfully');
         expect(capturedRequest.url.path, endsWith('/photos/upload'));
         expect(capturedRequest.headers['Accept'], 'application/json');
+        expect(capturedRequest.fields['project_id'], '42');
+
+        tempFile.deleteSync();
+      });
+
+      test('should omit project_id when uploading to my sketches', () async {
+        final tempFile = File('${Directory.systemTemp.path}/test_photo.jpg');
+        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(
+              utf8.encode(
+                jsonEncode({'message': 'Photo uploaded successfully'}),
+              ),
+            ),
+            201,
+          );
+        });
+
+        final apiService = ApiService(client: client, authService: _fakeAuth());
+        final result = await apiService.uploadPhoto(tempFile.path);
+
+        expect(result['success'], true);
+        expect(capturedRequest.url.path, endsWith('/photos/upload'));
+        expect(capturedRequest.fields.containsKey('project_id'), false);
 
         tempFile.deleteSync();
       });
@@ -189,7 +256,7 @@ void main() {
           ),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 1,
@@ -217,7 +284,7 @@ void main() {
           ),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 1,
@@ -237,7 +304,7 @@ void main() {
           (_) async => http.Response('<html>Server Error</html>', 500),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 1,
@@ -257,7 +324,7 @@ void main() {
           (_) => throw const SocketException('Connection refused'),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 1,
@@ -277,7 +344,7 @@ void main() {
           (_) async => http.Response(jsonEncode({}), 500),
         );
 
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
         final result = await apiService.uploadPhoto(
           tempFile.path,
           projectId: 1,
@@ -291,7 +358,7 @@ void main() {
 
       test('should always return map with success and message keys', () async {
         final client = MockClient((_) async => http.Response('', 500));
-        final apiService = ApiService(client: client);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
 
         final result = await apiService.uploadPhoto(
           '/nonexistent/photo.jpg',
@@ -306,65 +373,54 @@ void main() {
       });
     });
 
-    group('login', () {
-      test('should return token on 200 response', () async {
-        final client = MockClient((request) async {
-          expect(request.url.path, endsWith('/login'));
-          expect(request.headers['Content-Type'], contains('application/json'));
-          final body = jsonDecode(request.body) as Map<String, dynamic>;
-          expect(body['email'], 'john@example.com');
-          expect(body['password'], 'secret');
-          return http.Response(
-            jsonEncode({
-              'user': {'id': 1, 'email': 'john@example.com'},
-              'token': 'abc123',
-            }),
-            200,
+    group('uploadPhotoPreview', () {
+      test('should upload the already rotated preview image', () async {
+        final tempFile = File('${Directory.systemTemp.path}/test_preview.jpg');
+        tempFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+
+        late http.MultipartRequest capturedRequest;
+        final client = MockClient.streaming((request, _) async {
+          capturedRequest = request as http.MultipartRequest;
+          return http.StreamedResponse(
+            Stream.value(utf8.encode(jsonEncode({'preview_id': 7}))),
+            201,
           );
         });
 
-        final apiService = ApiService(client: client);
-        final result = await apiService.login(
-          email: 'john@example.com',
-          password: 'secret',
-        );
+        final apiService = ApiService(client: client, authService: _fakeAuth());
+        final result = await apiService.uploadPhotoPreview(tempFile.path);
 
-        expect(result.success, true);
-        expect(result.token, 'abc123');
+        expect(result['success'], true);
+        expect(result['preview_id'], 7);
+        expect(capturedRequest.url.path, endsWith('/photos/preview'));
+        expect(capturedRequest.fields.containsKey('rotation'), false);
+
+        tempFile.deleteSync();
       });
+    });
 
-      test('should return validation error message on 422', () async {
-        final client = MockClient(
-          (_) async => http.Response(
-            jsonEncode({
-              'message': 'The given data was invalid.',
-              'errors': {
-                'email': ['De opgegeven credentials zijn onjuist.'],
-              },
-            }),
-            422,
-          ),
-        );
+    group('commitPhotoPreview', () {
+      test('should send project_id without rotation', () async {
+        final client = MockClient((request) async {
+          expect(request.url.path, endsWith('/photos/preview/7/commit'));
+          expect(request.headers['Content-Type'], contains('application/json'));
 
-        final apiService = ApiService(client: client);
-        final result = await apiService.login(
-          email: 'john@example.com',
-          password: 'wrong',
-        );
+          final body = jsonDecode(request.body) as Map<String, dynamic>;
+          expect(body['project_id'], 42);
+          expect(body.containsKey('rotation'), false);
 
-        expect(result.success, false);
-        expect(result.token, isNull);
-        expect(result.message, 'De opgegeven credentials zijn onjuist.');
-      });
+          return http.Response(
+            jsonEncode({'photo_id': 9, 'sketch_id': 12}),
+            201,
+          );
+        });
 
-      test('should handle server errors gracefully', () async {
-        final client = MockClient(
-          (_) async => http.Response(jsonEncode({'message': 'oops'}), 500),
-        );
-        final apiService = ApiService(client: client);
-        final result = await apiService.login(email: 'a@b.nl', password: 'x');
-        expect(result.success, false);
-        expect(result.message, isNotEmpty);
+        final apiService = ApiService(client: client, authService: _fakeAuth());
+        final result = await apiService.commitPhotoPreview(7, projectId: 42);
+
+        expect(result['success'], true);
+        expect(result['photo_id'], 9);
+        expect(result['sketch_id'], 12);
       });
     });
   });

@@ -169,7 +169,7 @@ class ApiService {
 
   Future<Map<String, dynamic>> uploadPhoto(
     String photoPath, {
-    required int projectId,
+    int? projectId,
   }) async {
     final file = File(photoPath);
     if (!await file.exists()) {
@@ -184,7 +184,9 @@ class ApiService {
       );
 
       request.headers.addAll(await _authHeaders());
-      request.fields['project_id'] = projectId.toString();
+      if (projectId != null) {
+        request.fields['project_id'] = projectId.toString();
+      }
       request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
 
       streamedResponse = await _client
@@ -283,6 +285,212 @@ class ApiService {
       return {'success': false, 'message': 'Server is niet bereikbaar.'};
     } on TimeoutException {
       return {'success': false, 'message': 'Status ophalen duurde te lang.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Fout: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadPhotoPreview(String photoPath) async {
+    final file = File(photoPath);
+    if (!await file.exists()) {
+      return {'success': false, 'message': 'Bestand niet gevonden: $photoPath'};
+    }
+
+    http.StreamedResponse streamedResponse;
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/photos/preview'),
+      );
+      request.headers.addAll(await _authHeaders());
+      request.files.add(await http.MultipartFile.fromPath('photo', photoPath));
+      streamedResponse = await _client
+          .send(request)
+          .timeout(const Duration(seconds: 30));
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar. Controleer of de server draait.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message':
+            'Upload duurde te lang. Controleer je verbinding en probeer het opnieuw.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Kan geen verbinding maken: $e'};
+    }
+
+    try {
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return {
+          'success': true,
+          'preview_id': data['preview_id'],
+          if (data['nodes_count'] != null) 'nodes_count': data['nodes_count'],
+          if (data['edges_count'] != null) 'edges_count': data['edges_count'],
+        };
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      String errorMessage;
+      try {
+        final data = jsonDecode(response.body);
+        if (data['errors'] != null) {
+          final errors = data['errors'] as Map<String, dynamic>;
+          errorMessage = errors.values
+              .expand((v) => v is List ? v : [v])
+              .join(', ');
+        } else {
+          errorMessage = data['message'] ?? 'Onbekende fout';
+        }
+      } on FormatException {
+        errorMessage =
+            'Server gaf een ongeldig antwoord (${response.statusCode})';
+      }
+      return {'success': false, 'message': errorMessage};
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Fout bij verwerken van server-antwoord: $e',
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getPreviewStatus(int previewId) async {
+    try {
+      final response = await _client
+          .get(
+            Uri.parse('$baseUrl/photos/preview/$previewId'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return {'success': true, ...data};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Status ophalen mislukt (${response.statusCode})',
+      };
+    } on SocketException {
+      return {'success': false, 'message': 'Server is niet bereikbaar.'};
+    } on TimeoutException {
+      return {'success': false, 'message': 'Status ophalen duurde te lang.'};
+    } catch (e) {
+      return {'success': false, 'message': 'Fout: $e'};
+    }
+  }
+
+  Future<Map<String, dynamic>> commitPhotoPreview(
+    int previewId, {
+    int? projectId,
+  }) async {
+    try {
+      final response = await _client
+          .post(
+            Uri.parse('$baseUrl/photos/preview/$previewId/commit'),
+            headers: await _authHeaders(json: true),
+            body: jsonEncode({'project_id': ?projectId}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return {
+          'success': true,
+          'photo_id': data['photo_id'],
+          if (data['sketch_id'] != null) 'sketch_id': data['sketch_id'],
+          'message': data['message'],
+        };
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      String errorMessage;
+      try {
+        final data = jsonDecode(response.body);
+        errorMessage =
+            data['message'] ?? 'Bevestigen mislukt (${response.statusCode})';
+      } on FormatException {
+        errorMessage =
+            'Server gaf een ongeldig antwoord (${response.statusCode})';
+      }
+      return {'success': false, 'message': errorMessage};
+    } on SocketException {
+      return {
+        'success': false,
+        'message': 'Server is niet bereikbaar. Controleer of de server draait.',
+      };
+    } on TimeoutException {
+      return {
+        'success': false,
+        'message': 'Verbinding duurde te lang. Probeer het later opnieuw.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': 'Kan niet verbinden met de server'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deletePhotoPreview(int previewId) async {
+    try {
+      final response = await _client
+          .delete(
+            Uri.parse('$baseUrl/photos/preview/$previewId'),
+            headers: await _authHeaders(),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return {'success': true};
+      }
+
+      if (response.statusCode == 401) {
+        await _authService.clearToken();
+        return {
+          'success': false,
+          'unauthorized': true,
+          'message': 'Je sessie is verlopen. Log opnieuw in.',
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Verwijderen mislukt (${response.statusCode})',
+      };
+    } on SocketException {
+      return {'success': false, 'message': 'Server is niet bereikbaar.'};
+    } on TimeoutException {
+      return {'success': false, 'message': 'Verbinding duurde te lang.'};
     } catch (e) {
       return {'success': false, 'message': 'Fout: $e'};
     }

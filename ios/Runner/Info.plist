@@ -70,10 +70,23 @@
   <string>Archify heeft toegang tot je galerij nodig om foto's te selecteren</string>
   <key>NSCameraUsageDescription</key>
   <string>Deze app heeft toegang tot je camera nodig.</string>
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>msauth.$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+      </array>
+    </dict>
+  </array>
   <key>LSApplicationQueriesSchemes</key>
   <array>
     <string>mailto</string>
+    <string>msauthv2</string>
+    <string>msauthv3</string>
   </array>
+  <key>NSLocalNetworkUsageDescription</key>
+  <string>Archify maakt verbinding met de lokale ontwikkelserver tijdens het testen.</string>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSAllowsArbitraryLoads</key>
