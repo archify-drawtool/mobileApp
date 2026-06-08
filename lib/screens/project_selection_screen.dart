@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:archify_app/main.dart';
 import 'package:archify_app/models/project.dart';
 import 'package:archify_app/services/api_service.dart';
 import 'package:archify_app/screens/upload_status_screen.dart';
-import 'package:archify_app/services/photo_service.dart';
 import 'package:archify_app/theme/app_theme.dart';
 import 'package:archify_app/widgets/archify_logo.dart';
 import 'package:archify_app/widgets/screen_badge.dart';
 
 class ProjectSelectionScreen extends StatefulWidget {
-  final String photoPath;
+  final int previewId;
+  final int? nodesCount;
+  final int? edgesCount;
 
-  /// Clockwise quarter turns picked in the preview, baked into the upload.
-  final int quarterTurns;
+  final ApiService? apiService;
 
   const ProjectSelectionScreen({
     super.key,
-    required this.photoPath,
-    this.quarterTurns = 0,
+    required this.previewId,
+    this.nodesCount,
+    this.edgesCount,
+    this.apiService,
   });
 
   @override
@@ -26,10 +28,11 @@ class ProjectSelectionScreen extends StatefulWidget {
 }
 
 class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
-  final ApiService _apiService = ApiService();
-  final PhotoService _photoService = PhotoService();
+  late final ApiService _apiService = widget.apiService ?? ApiService();
+  final TextEditingController _searchController = TextEditingController();
   List<Project> _projects = [];
   Project? _selectedProject;
+  String _searchQuery = '';
   bool _isLoading = true;
   bool _isUploading = false;
   String? _errorMessage;
@@ -38,6 +41,20 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   void initState() {
     super.initState();
     _loadProjects();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Project> get _filteredProjects {
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return _projects;
+    return _projects
+        .where((p) => p.title.toLowerCase().contains(query))
+        .toList();
   }
 
   Future<void> _loadProjects() async {
@@ -72,16 +89,10 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
   Future<void> _onUpload() async {
     setState(() => _isUploading = true);
 
-    final fixedPath = await _photoService.fixOrientation(
-      widget.photoPath,
-      quarterTurns: widget.quarterTurns,
-    );
-    final result = await _apiService.uploadPhoto(
-      fixedPath,
+    final result = await _apiService.commitPhotoPreview(
+      widget.previewId,
       projectId: _selectedProject?.id,
     );
-
-    await _photoService.cleanupFixedPhoto(fixedPath);
 
     if (!mounted) return;
 
@@ -105,7 +116,7 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Upload mislukt: ${result['message']}')),
+      SnackBar(content: Text('Opslaan mislukt: ${result['message']}')),
     );
   }
 
@@ -216,32 +227,107 @@ class _ProjectSelectionScreenState extends State<ProjectSelectionScreen> {
       );
     }
 
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+    final filtered = _filteredProjects;
+
+    return Column(
       children: [
-        _buildDestinationTile(
-          title: 'Mijn Schetsen',
-          icon: LucideIcons.folder,
-          isSelected: _selectedProject == null,
-          onTap: () => setState(() => _selectedProject = null),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: _buildSearchField(),
         ),
         const SizedBox(height: 16),
-        const Text('Projecten', style: AppTextStyles.body),
-        const SizedBox(height: 8),
-        ..._projects.map((project) {
-          final isSelected = _selectedProject?.id == project.id;
+        Expanded(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            children: [
+              _buildDestinationTile(
+                title: 'Mijn Schetsen',
+                icon: LucideIcons.folder,
+                isSelected: _selectedProject == null,
+                onTap: () => setState(() => _selectedProject = null),
+              ),
+              const SizedBox(height: 16),
+              const Text('Projecten', style: AppTextStyles.body),
+              const SizedBox(height: 8),
+              if (filtered.isEmpty)
+                _buildNoMatches()
+              else
+                ...filtered.map((project) {
+                  final isSelected = _selectedProject?.id == project.id;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _buildDestinationTile(
-              title: project.title,
-              icon: LucideIcons.folderOpen,
-              isSelected: isSelected,
-              onTap: () => setState(() => _selectedProject = project),
-            ),
-          );
-        }),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _buildDestinationTile(
+                      title: project.title,
+                      icon: LucideIcons.folderOpen,
+                      isSelected: isSelected,
+                      onTap: () => setState(() => _selectedProject = project),
+                    ),
+                  );
+                }),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+
+  Widget _buildSearchField() {
+    const border = OutlineInputBorder(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+      borderSide: BorderSide(color: AppColors.grey),
+    );
+
+    return TextField(
+      controller: _searchController,
+      enabled: !_isUploading,
+      onChanged: (value) => setState(() => _searchQuery = value),
+      textInputAction: TextInputAction.search,
+      cursorColor: AppColors.magenta,
+      style: const TextStyle(color: AppColors.white, fontSize: 16),
+      decoration: InputDecoration(
+        isDense: true,
+        hintText: 'Zoek een project',
+        hintStyle: const TextStyle(color: AppColors.grey),
+        prefixIcon: const Icon(
+          LucideIcons.search,
+          color: AppColors.grey,
+          size: 20,
+        ),
+        suffixIcon: _searchQuery.isNotEmpty
+            ? IconButton(
+                icon: const Icon(
+                  LucideIcons.x,
+                  color: AppColors.grey,
+                  size: 20,
+                ),
+                tooltip: 'Zoekopdracht wissen',
+                onPressed: () {
+                  _searchController.clear();
+                  setState(() => _searchQuery = '');
+                },
+              )
+            : null,
+        enabledBorder: border,
+        border: border,
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderSide: BorderSide(color: AppColors.magenta, width: 2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoMatches() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Text(
+          'Geen projecten gevonden',
+          textAlign: TextAlign.center,
+          style: AppTextStyles.body,
+        ),
+      ),
     );
   }
 
