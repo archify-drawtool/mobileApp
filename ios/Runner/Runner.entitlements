@@ -5,7 +5,7 @@
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)com.microsoft.adalcache</string>
-		<string>$(AppIdentifierPrefix)com.example.archifyApp</string>
+		<string>$(AppIdentifierPrefix)digital.cbyte.archify</string>
 	</array>
 </dict>
 </plist>
