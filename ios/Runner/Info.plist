@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Archify App</string>
+	<string>Archify</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -85,14 +85,5 @@
     <string>msauthv2</string>
     <string>msauthv3</string>
   </array>
-  <key>NSLocalNetworkUsageDescription</key>
-  <string>Archify maakt verbinding met de lokale ontwikkelserver tijdens het testen.</string>
-  <key>NSAppTransportSecurity</key>
-  <dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-    <key>NSAllowsLocalNetworking</key>
-    <true/>
-  </dict>
 </dict>
 </plist>
